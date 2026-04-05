@@ -159,33 +159,46 @@ Skills with skipped configuration are marked in the CLAUDE.md Skill quick refere
 
 **2.2b Install External Core Skills**
 
-The following core Skills are not bundled and must be installed from Git:
+The following core Skills are not bundled. Install using the method matching your AI tool:
 
-```bash
-# superpowers — Behavior control (SessionStart hook injects methodology)
-cd ~/.claude/skills/ && git clone https://github.com/obra/superpowers.git superpowers
+**superpowers** — Behavior control (SessionStart hook injects methodology)
 
-# planning-with-files — Plan persistence (4 hooks continuously inject plan into context)
-cd ~/.claude/skills/ && git clone https://github.com/OthmanAdi/planning-with-files.git planning-with-files
+| AI Tool | Install Command |
+|---------|----------------|
+| Claude Code | `/plugin install superpowers@claude-plugins-official` |
+| Cursor | `/add-plugin superpowers` |
+| Gemini CLI | `gemini extensions install https://github.com/obra/superpowers` |
+| Fallback (any) | `git clone https://github.com/obra/superpowers.git ~/.claude/skills/superpowers` |
 
-# claudeception — Knowledge extraction (UserPromptSubmit hook reminds to evaluate extractable knowledge)
-cd ~/.claude/skills/ && git clone https://github.com/blader/Claudeception.git claudeception
-```
+**planning-with-files** — Plan persistence (4 hooks continuously inject plan into context)
+
+| AI Tool | Install Command |
+|---------|----------------|
+| Claude Code | `/plugin marketplace add OthmanAdi/planning-with-files` then `/plugin install planning-with-files@planning-with-files` |
+| Fallback (any) | `git clone https://github.com/OthmanAdi/planning-with-files.git && cp -r planning-with-files/skills/* ~/.claude/skills/` |
+
+**claudeception** — Knowledge extraction (UserPromptSubmit hook reminds to evaluate extractable knowledge)
+
+| AI Tool | Install Command |
+|---------|----------------|
+| All | `cd ~/.claude/skills/ && git clone https://github.com/blader/Claudeception.git claudeception` |
+
+> **Note**: Plugin-installed skills (superpowers, planning-with-files) auto-register hooks. Fallback git clone installs require manual hook configuration in settings.json. claudeception always needs manual hook setup.
 
 **2.3 Configure Hooks (Ensure Skills Actually Take Effect)**
 
-**This is the key step.** Simply installing skills is not enough — hooks must be configured to trigger them at the right moment.
+**This is the key step.** Plugin-installed skills auto-register their hooks. For fallback installs, claudeception, and enterprise hooks, manual configuration is needed.
 
 Hook mechanisms for the three core skills:
 
-| Skill | Hook Event | Purpose |
-|-------|-----------|---------|
-| superpowers | `SessionStart` | Inject using-superpowers methodology at every new session/clear/compact |
-| planning-with-files | `UserPromptSubmit` | Display current plan status on every user input |
-| planning-with-files | `PreToolUse` | Re-read the first 30 lines of task_plan.md before every tool call |
-| planning-with-files | `PostToolUse` | Remind to update progress.md after every write |
-| planning-with-files | `Stop` | Check task completion status on exit |
-| claudeception | `UserPromptSubmit` | Inject "evaluate whether there is extractable knowledge" on every input |
+| Skill | Hook Event | Purpose | Registration |
+|-------|-----------|---------|-------------|
+| superpowers | `SessionStart` | Inject using-superpowers methodology at every new session/clear/compact | Auto (Plugin) |
+| planning-with-files | `UserPromptSubmit` | Display current plan status on every user input | Auto (SKILL.md) |
+| planning-with-files | `PreToolUse` | Re-read the first 30 lines of task_plan.md before every tool call | Auto (SKILL.md) |
+| planning-with-files | `PostToolUse` | Remind to update progress.md after every write | Auto (SKILL.md) |
+| planning-with-files | `Stop` | Check task completion status on exit | Auto (SKILL.md) |
+| claudeception | `UserPromptSubmit` | Inject "evaluate whether there is extractable knowledge" on every input | Manual (settings.json) |
 
 **Optional: Enterprise Security Gate Hooks** `[Optional/Enterprise]`
 
