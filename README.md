@@ -73,18 +73,37 @@ One-line description
 
 Why "slim down"? Because CLAUDE.md is read in full at every session. Stuffing 500 lines into it = wasted tokens + key information buried. Detailed content is split into docs/ sub-documents, **loaded on demand**.
 
-**2. docs/ — Multi-Level Documentation System**
+**2. docs/ — Multi-Level Index Tree (AI's B-tree Memory)**
+
+AI's memory isn't a pile of documents — it's an index tree. Each level stores only pointers; only leaf nodes store content:
+
+```
+L0: CLAUDE.md (≤100 lines)
+     → 5 category pointers, zero actual content
+     │
+L1: docs/xxx/INDEX.md (≤50 lines)
+     → Module list + one-line summary + last updated date
+     │
+L2: docs/xxx/module/INDEX.md (≤30 lines)
+     → Leaf document list + timeline (when was what added/changed)
+     │
+L3: docs/xxx/module/topic.md (≤150 lines)
+     → Actual content (the ONLY level with real content)
+```
+
+**AI memory recovery path**: read L0 → determine direction → read L1 → locate module → read L2 → find document → read L3. Only one index level is read at a time, minimizing token consumption.
+
+**Auto-scaling**: Early projects: L1 points directly to leaves (two levels suffice). As the project grows, L2 subdirectories naturally emerge. When L1 INDEX exceeds 10 entries → upgrade to three levels. When a leaf exceeds 150 lines → auto-split.
 
 ```
 docs/
-├── architecture/     → System architecture, tech stack, DB Schema, API reference
-├── implementation/   → Implementation docs split by feature module
-├── conventions/      → must-follow / must-not / secure-coding
-├── pitfalls/         → Pitfall records (accumulated during development)
-└── backlog/          → Optimization directions / features to implement
+├── architecture/INDEX.md     → system-overview.md, tech-stack.md, db-schema.md, api-reference.md
+├── implementation/INDEX.md   → auth/INDEX.md, payment/INDEX.md, export/INDEX.md ...
+│   └── auth/INDEX.md         → oauth2-flow.md, rbac-model.md, session-mgmt.md + timeline
+├── conventions/INDEX.md      → must-follow.md, must-not.md, secure-coding.md
+├── pitfalls/INDEX.md         → docker/INDEX.md, database/INDEX.md ... + timeline
+└── backlog/INDEX.md          → optimization.md, features.md
 ```
-
-Each directory has an INDEX.md for navigation, and each sub-document is ≤150 lines. The AI reads by path as needed and never loads everything at once.
 
 **3. Agent Team — Role-Based Division of Labor**
 
@@ -591,7 +610,8 @@ Harness is not limited to Claude Code — it's compatible with all major AI codi
 │   ├── secure-coding.md                  Security standards (CWE + OWASP + Agent red lines)
 │   └── conventions.md                    Dev conventions + Agent behavior rules (9 MUST rules)
 └── templates/
-    ├── claude-md-index.md                CLAUDE.md slim template
+    ├── claude-md-index.md                CLAUDE.md slim template (L0 index)
+    ├── sub-index.md                      L1 category index + L2 module index templates
     ├── task-plan.md                      Task plan template
     └── agent-role.md                     Agent role definition template
 ```
