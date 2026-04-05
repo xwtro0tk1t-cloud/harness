@@ -596,10 +596,17 @@ Harness is not limited to Claude Code — it's compatible with all major AI codi
     └── agent-role.md                     Agent role definition template
 ```
 
+## example：
+<img width="2106" height="1416" alt="38fae6d86bb4d6394415b2866b46c21f" src="https://github.com/user-attachments/assets/094127e2-9b70-4352-b720-21fa723ae90b" />
+
+<img width="3218" height="1808" alt="de0783c11604bcc8a6121092acc67b2a" src="https://github.com/user-attachments/assets/6aa5bac4-f878-435f-badd-ca9073e18668" />
+
+
+
 ---
 
 ## FAQ
-
+ß
 **Q: What's the relationship between Harness and superpowers?**
 A: superpowers is the underlying behavior control framework (14 sub-Skills), while Harness is the higher-level orchestrator — it installs superpowers, configures hooks, generates documentation, and assembles the Agent Team. Analogy: superpowers is the Linux kernel, Harness is the Ubuntu installer.
 
