@@ -32,6 +32,7 @@ Scan the project root directory, determine the project type, and branch accordin
    - Check package.json / go.mod / Cargo.toml / pyproject.toml / pom.xml / build.gradle etc.
    - Identify primary language (Python/Go/Java/Rust/TypeScript/JavaScript etc.)
    - Identify framework (FastAPI/Django/Gin/Spring/React/Vue/Next.js etc.)
+   - Record primary tech stack (used in Step 5 for tailoring lang-patterns coding conventions)
    - New project: ask the user for the target tech stack
 
 3. Project structure analysis
@@ -105,9 +106,60 @@ Scan the `~/.claude/skills/` directory and display a complete inventory:
   [list remaining installed skills]
 ```
 
-**2.2 Install Missing Core Skills**
+**2.2 Install Bundled Skills**
 
-For each uninstalled core skill, guide the user through installation:
+Harness includes the following Skills, installed to `~/.claude/skills/` via symlink:
+
+```
+🔧 Infrastructure Skills:
+  [status] skill-creator                  — General-purpose Skill generator
+  [status] security-review-skill-creator  — Security audit Skill generator
+
+🔒 Security Skills:
+  [status] security-review-skill-for-docker    — Docker/container security audit
+  [status] security-review-skill-for-terraform — Terraform/IaC security audit
+  [status] sca-ai-denoise                      — SCA vulnerability denoising (P0-P3 grading)
+  [status] supply-chain-audit                  — Supply chain poisoning detection (8 languages)
+  [status] skills-audit                        — Third-party Skill security audit
+  [status] web-vuln-analyzer                   — Web vulnerability analysis [requires Docker]
+  [status] android-vuln-analyzer               — Android vulnerability analysis [requires toolchain]
+
+🛠 Harness Commands:
+  [status] harness-help          — Command index + scenario quick ref
+  [status] harness-audit         — Project health check
+  [status] harness-quality-gate  — Pre-commit quality gate
+  [status] harness-guide         — Skill recommendation guide
+```
+
+Installation: create symlinks for each bundled skill
+```bash
+# Batch install all bundled skills
+for skill in ~/.claude/skills/harness-en/bundled-skills/*/; do
+  name=$(basename "$skill")
+  ln -sf "$skill" ~/.claude/skills/"$name"
+done
+```
+
+**Skills requiring configuration** (interactive during install):
+
+```
+The following Skills require additional configuration:
+
+1. web-vuln-analyzer — Requires Docker environment + API configuration
+   Configure? [y/n] → y: guide .env setup → n: mark as "⚠️ Not available"
+
+2. android-vuln-analyzer — Requires Android security toolchain (apktool/jadx/frida)
+   Configure? [y/n] → y: show install commands → n: mark as "⚠️ Not available"
+
+3. skills-audit — Optional ANTHROPIC_API_KEY for AI analysis mode
+   Configure? [y/n] → y: guide configuration → n: basic features still available
+```
+
+Skills with skipped configuration are marked in the CLAUDE.md Skill quick reference as "⚠️ Not available — requires XX, say 'configure <skill-name>' to enable".
+
+**2.2b Install External Core Skills**
+
+The following core Skills are not bundled and must be installed from Git:
 
 ```bash
 # superpowers — Behavior control (SessionStart hook injects methodology)
@@ -134,6 +186,24 @@ Hook mechanisms for the three core skills:
 | planning-with-files | `PostToolUse` | Remind to update progress.md after every write |
 | planning-with-files | `Stop` | Check task completion status on exit |
 | claudeception | `UserPromptSubmit` | Inject "evaluate whether there is extractable knowledge" on every input |
+
+**Optional: Enterprise Security Gate Hooks** `[Optional/Enterprise]`
+
+In addition to the core Skill hooks above, Harness provides 4 security gate hook scripts as optional enterprise templates.
+Not enabled by default — in open-source mode, security relies on CLAUDE.md MUST/MUST NOT text rules.
+
+Ask the user: "Enable enterprise security gates? (pre-commit secret check / commit format validation / dangerous command interception / code write security scan)"
+
+| Hook | Function | Blocking | Status |
+|------|----------|----------|--------|
+| Hook A: pre-commit-gate | Check for sensitive files and hardcoded secrets before git commit | exit 1 blocks | Optional |
+| Hook B: commit-msg-check | Validate Conventional Commit format | exit 1 blocks | Optional |
+| Hook C: dangerous-cmd-guard | Block data exfiltration / destructive operations / credential theft | exit 1 blocks | Optional |
+| Hook D: write-security-scan | Detect security anti-patterns after code writes | WARNING non-blocking | Optional |
+
+- User says "yes" → Copy scripts from `references/hook-scripts.md` to `.harness/hooks/`, register in settings.json
+- User says "no" → Skip, security standards still covered by CLAUDE.md text rules
+- Full script source and configuration in `references/hook-scripts.md`
 
 **Configuration method**: Add hook configuration in the project's `.claude/settings.json`.
 
@@ -166,6 +236,10 @@ Show the user usage scenarios for "generator"-type Skills:
 **2.5 Project-Specific Skill Check**
 
 Check the project's `.claude/skills/` and list existing project-specific Skills.
+
+Also scan `~/.claude/skills/security-review-skill-for-*` to check for a security audit Skill matching the current project:
+- If none found → prompt: "Generate a security audit skill for this project? User says yes → invoke security-review-skill-creator"
+- If found → display the existing Skill name
 
 ---
 
@@ -269,6 +343,18 @@ Extract from `references/conventions.md` Part B and write into the "Behavior Rul
 - MUST NOT leave debug print / console.log / temporary test scripts
 - MUST NOT leave unused imports / variables / functions / dependencies
 - MUST clean up junk files in the root directory (test scripts go in tests/, docs go in docs/)
+
+### Token Efficiency
+- /compact at Phase completion boundaries, not mid-task
+- After compact, MUST re-read task_plan.md
+- Large files (>300 lines): use offset+limit for segmented reading
+- Structured output (JSON/tables) preferred over long-form prose
+
+### Security Red Lines
+- MUST NOT eval()/exec() with user input — CWE-95
+- MUST NOT shell=True with user arguments — CWE-78
+- MUST NOT f-string/format SQL concatenation — CWE-89
+- MUST NOT commit .env / *.key / *.pem — CWE-798
 ```
 
 **If CLAUDE.md already exists**: extract valuable content and migrate it to `docs/`, restructure as index format, and confirm with the user.
@@ -479,6 +565,18 @@ Write the following standards into `docs/conventions/`. These standards cover **
 - Do not skip tests and commit directly
 - Do not skip review and merge directly
 
+**coding-patterns.md** — Tailored from `references/lang-patterns.md` based on detected tech stack:
+- Based on the primary language/framework identified in Step 1, extract applicable sections from `references/lang-patterns.md`
+- Example: Python project → extract Python section (security + idiomatic patterns + common pitfalls)
+- Multi-language projects → extract all relevant language sections
+- Write to `docs/conventions/coding-patterns.md`
+
+**must-follow.md** append Token optimization rules — inject from `references/conventions.md` Part D:
+- Model routing recommendations (Haiku/Sonnet/Opus by scenario)
+- /compact strategy
+- Context budget management
+- Structured output first
+
 **secure-coding.md** — Inject from `references/secure-coding.md` (**hard control, non-negotiable**):
 - Part A: 15-item high-risk CWE defense checklist — all code changes must comply
 - Part B: OWASP Top 10 coding standards (13 rules with code examples) — mandatory baseline when writing code
@@ -497,6 +595,11 @@ Write the following standards into `docs/conventions/`. These standards cover **
 │   ├── engineer.md
 │   ├── tester.md
 │   └── [extended-roles].md
+├── hooks/                  → [Optional] Enterprise security gate scripts (generated when Step 2.3 enabled)
+│   ├── pre-commit-gate.sh
+│   ├── commit-msg-check.sh
+│   ├── dangerous-cmd-guard.sh
+│   └── write-security-scan.sh
 ├── plans/                  → Task plans directory
 │   └── .gitkeep
 └── templates/              → Plan templates (derived from planning-with-files)
@@ -552,6 +655,16 @@ Display the initialization summary + **beginner usage guide**:
 
 🛠 Create a custom Skill:
   1. "Help me create a skill for XX"    → Trigger skill-creator
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📟 Harness Command Quick Reference
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  harness              — Project initialization (re-run to supplement missing parts)
+  harness help         — Command index + scenario quick reference
+  harness audit        — Project health check (scoring + remediation)
+  harness quality gate — Pre-commit quality gate
+  harness guide        — Skill recommendation (match by scenario)
 ```
 
 ---
@@ -706,6 +819,9 @@ Harness uses three overlapping layers to ensure shared Skills are used correctly
 | `references/agent-teams.md` | Agent Team framework (role definitions + extension guide) |
 | `references/secure-coding.md` | Security standards (CWE + OWASP + Agent behavior red lines) |
 | `references/conventions.md` | General development conventions (Git / Review / Test) |
+| `references/lang-patterns.md` | Tech stack coding patterns quick reference (6 languages/frameworks) |
+| `references/hook-scripts.md` | Enterprise Hook gate script templates (4 scripts + activation guide) |
+| `references/skill-guide.md` | Scenario → Skill recommendation matrix (data source for harness guide command) |
 | `templates/claude-md-index.md` | CLAUDE.md slim index template |
 | `templates/task-plan.md` | Task plan template |
 | `templates/agent-role.md` | Agent role definition template |

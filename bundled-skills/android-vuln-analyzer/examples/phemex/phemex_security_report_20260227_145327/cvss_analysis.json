@@ -1,0 +1,98 @@
+{
+  "cvssVersion": "3.1",
+  "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:N",
+  "baseScore": 9.3,
+  "baseSeverity": "CRITICAL",
+  "attackVector": {
+    "value": "NETWORK",
+    "score": "N",
+    "justification": "可通过网络远程触发，包括浏览器 intent: URI 和恶意应用下载"
+  },
+  "attackComplexity": {
+    "value": "LOW",
+    "score": "L",
+    "justification": "无需特殊条件，攻击简单明了，仅需用户已登录应用"
+  },
+  "privilegesRequired": {
+    "value": "NONE",
+    "score": "N",
+    "justification": "攻击者无需任何特权或身份验证即可触发漏洞"
+  },
+  "userInteraction": {
+    "value": "REQUIRED",
+    "score": "R",
+    "justification": "需要用户交互：点击恶意链接或安装包含恶意代码的第三方应用"
+  },
+  "scope": {
+    "value": "CHANGED",
+    "score": "C",
+    "justification": "漏洞影响超出易受攻击组件的授权范围，访问了其他组件的敏感数据（JWT令牌、设备ID）"
+  },
+  "confidentiality": {
+    "value": "HIGH",
+    "score": "H",
+    "justification": "完全泄露用户的JWT会话令牌、设备ID，攻击者可访问所有账户数据、交易历史、个人信息"
+  },
+  "integrity": {
+    "value": "HIGH",
+    "score": "H",
+    "justification": "攻击者可使用窃取的令牌执行交易、修改账户设置、生成API密钥，完全控制账户"
+  },
+  "availability": {
+    "value": "NONE",
+    "score": "N",
+    "justification": "漏洞不直接影响应用或服务的可用性"
+  },
+  "exploitability": {
+    "score": 2.8,
+    "description": "高度可利用"
+  },
+  "impact": {
+    "score": 5.8,
+    "description": "严重影响"
+  },
+  "vulnerabilityDetails": {
+    "type": "Exported Activity + Intent Injection + WebView JavaScript Bridge Exposure",
+    "cwe": [
+      "CWE-749: Exposed Dangerous Method or Function",
+      "CWE-200: Exposure of Sensitive Information",
+      "CWE-927: Use of Implicit Intent for Sensitive Communication"
+    ],
+    "owaspMobile": "M1: Improper Platform Usage",
+    "affectedComponent": "com.phemex.app.third.firebase.FirebasePushClickActivity",
+    "affectedVersions": [
+      "5.10.0"
+    ],
+    "potentiallyAffectedVersions": [
+      "5.x.x (requires verification)"
+    ]
+  },
+  "realWorldImpact": {
+    "financialRisk": "CRITICAL",
+    "reputationalRisk": "CRITICAL",
+    "complianceRisk": "HIGH",
+    "estimatedAffectedUsers": "300000+",
+    "potentialFinancialLoss": "$3,000,000+ (large-scale attack scenario)"
+  },
+  "mitigationComplexity": {
+    "developmentEffort": "LOW",
+    "testingEffort": "MEDIUM",
+    "deploymentRisk": "LOW",
+    "estimatedFixTime": "7-12 days"
+  },
+  "recommendations": {
+    "priority": "P0 - CRITICAL",
+    "timeline": "Immediate",
+    "actions": [
+      "Remove android:exported=true or add signature-level permission",
+      "Implement URL whitelist for WebView navigation",
+      "Add Bridge origin verification",
+      "Remove sensitive data (token, device ID) from Bridge API responses",
+      "Implement forced app update mechanism",
+      "Enable server-side anomaly detection"
+    ]
+  },
+  "calculatedAt": "2026-02-27T14:53:27Z",
+  "calculatedBy": "Security Research Team",
+  "calculator": "https://www.first.org/cvss/calculator/3.1"
+}

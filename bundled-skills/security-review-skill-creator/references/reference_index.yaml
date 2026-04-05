@@ -1,0 +1,332 @@
+# Reference Index - 参考资料选择映射
+# 生成 security-review-skill 时，根据项目技术栈智能选择参考文件
+# 六层选择映射：语言 → 框架 → 安全领域 → 核心 → Wooyun → 始终包含
+
+# ============================================================
+# Layer 1: 语言 → 文件
+# 根据项目主语言选择对应的漏洞模式、检查清单、适配器
+# ============================================================
+languages:
+  java:
+    primary: languages/java.md
+    specialized:
+      - languages/java_deserialization.md
+      - languages/java_fastjson.md
+      - languages/java_jndi_injection.md
+      - languages/java_xxe.md
+      - languages/java_gadget_chains.md
+      - languages/java_script_engines.md
+      - languages/java_practical.md
+    checklist: checklists/java.md
+    adapter: adapters/java.yaml
+
+  python:
+    primary: languages/python.md
+    specialized:
+      - languages/python_deserialization.md
+    checklist: checklists/python.md
+    adapter: adapters/python.yaml
+
+  go:
+    primary: languages/go.md
+    specialized: []
+    checklist: checklists/go.md
+    adapter: adapters/go.yaml
+
+  javascript:
+    primary: languages/javascript.md
+    specialized: []
+    checklist: checklists/javascript.md
+    adapter: adapters/javascript.yaml
+
+  php:
+    primary: languages/php.md
+    specialized:
+      - languages/php_deserialization.md
+    checklist: checklists/php.md
+    adapter: adapters/php.yaml
+
+  ruby:
+    primary: languages/ruby.md
+    specialized: []
+    checklist: checklists/ruby.md
+
+  rust:
+    primary: languages/rust.md
+    specialized: []
+    checklist: checklists/rust.md
+
+  c_cpp:
+    primary: languages/c_cpp.md
+    specialized: []
+    checklist: checklists/c_cpp.md
+
+  dotnet:
+    primary: languages/dotnet.md
+    specialized: []
+    checklist: checklists/dotnet.md
+
+  # ---- 移动端语言 ----
+  kotlin:
+    primary: languages/kotlin.md
+    specialized: []
+    checklist: checklists/kotlin.md
+    adapter: adapters/kotlin.yaml
+    notes: "Android 主语言。Kotlin 项目同时加载 java 的 specialized（共享 JVM 生态反序列化等）"
+
+  swift:
+    primary: languages/swift.md
+    specialized: []
+    checklist: checklists/swift.md
+    adapter: adapters/swift.yaml
+    notes: "iOS/macOS 主语言"
+
+  dart:
+    primary: languages/dart.md
+    specialized: []
+    checklist: checklists/dart.md
+    adapter: adapters/dart.yaml
+    notes: "Flutter 主语言。跨平台项目需同时加载 android_sdk 和 ios_sdk 框架参考"
+
+# ============================================================
+# Layer 2: 框架 → 文件
+# 根据项目使用的框架选择对应的安全指南
+# ============================================================
+frameworks:
+  # Java 框架
+  spring: frameworks/spring.md
+  java_web_framework: frameworks/java_web_framework.md
+  mybatis: frameworks/mybatis_security.md
+
+  # Python 框架
+  django: frameworks/django.md
+  flask: frameworks/flask.md
+  fastapi: frameworks/fastapi.md
+
+  # JavaScript/Node 框架
+  express: frameworks/express.md
+  koa: frameworks/koa.md
+  nest_fastify: frameworks/nest_fastify.md
+
+  # Go 框架
+  gin: frameworks/gin.md
+
+  # PHP 框架
+  laravel: frameworks/laravel.md
+
+  # Ruby 框架
+  rails: frameworks/rails.md
+
+  # Rust 框架
+  rust_web: frameworks/rust_web.md
+
+  # .NET 框架
+  dotnet: frameworks/dotnet.md
+
+  # ---- 移动端框架 ----
+  android_sdk: frameworks/android.md
+  ios_sdk: frameworks/ios.md
+  flutter: frameworks/flutter.md
+  react_native: frameworks/react_native.md
+
+# ============================================================
+# Layer 3: 业务关键词 → 安全领域文件
+# 根据项目文档中出现的业务关键词选择安全领域深度分析
+# ============================================================
+security_domains:
+  - name: payment_finance
+    keywords: [payment, finance, 支付, 金融, 交易, transaction, checkout, 结算, balance, 余额, refund, 退款]
+    files:
+      - security/business_logic.md
+      - security/race_conditions.md
+
+  - name: authentication
+    keywords: [auth, login, oauth, 认证, 登录, 注册, register, password, 密码, session, token, jwt, sso]
+    files:
+      - security/authentication_authorization.md
+      - security/oauth_oidc_saml.md
+
+  - name: api
+    keywords: [api, rest, restful, graphql, grpc, endpoint, 接口]
+    files:
+      - security/api_security.md
+
+  - name: graphql
+    keywords: [graphql, query, mutation, subscription]
+    files:
+      - security/graphql.md
+
+  - name: file_handling
+    keywords: [upload, download, file, 文件, 上传, 下载, storage, oss, s3]
+    files:
+      - security/file_operations.md
+
+  - name: llm_ai
+    keywords: [llm, ai, gpt, claude, openai, prompt, 大模型, 人工智能, embedding, vector]
+    files:
+      - security/llm_security.md
+
+  - name: mobile
+    keywords: [mobile, android, ios, app, 移动端, flutter, react native, apk, ipa, webview, intent, keychain, biometric]
+    files:
+      - security/mobile_security.md
+    notes: "移动端项目还应通过 Layer 1 (kotlin/swift) 和 Layer 2 (android_sdk/ios_sdk) 获取语言和框架级参考"
+
+  - name: serverless
+    keywords: [serverless, lambda, cloud function, 云函数, faas]
+    files:
+      - security/serverless.md
+
+  - name: gateway_proxy
+    keywords: [gateway, proxy, nginx, kong, envoy, 网关, 代理, reverse proxy]
+    files:
+      - security/api_gateway_proxy.md
+
+  - name: cache
+    keywords: [cache, redis, memcached, cdn, 缓存, host header]
+    files:
+      - security/cache_host_header.md
+
+  - name: microservices
+    keywords: [microservice, 微服务, service mesh, istio, grpc, 服务间调用]
+    files:
+      - security/cross_service_trust.md
+
+  - name: crypto
+    keywords: [encrypt, decrypt, 加密, 解密, crypto, hash, sign, certificate, tls, ssl]
+    files:
+      - security/cryptography.md
+
+  - name: dependency
+    keywords: [dependency, npm, maven, pip, 依赖, supply chain, 供应链]
+    files:
+      - security/dependencies.md
+      - security/infra_supply_chain.md
+
+  - name: frontend
+    keywords: [frontend, react, vue, angular, 前端, spa, csr, ssr]
+    files:
+      - security/frontend_frameworks.md
+
+  - name: http_smuggling
+    keywords: [smuggling, http/2, chunked, transfer-encoding, 走私]
+    files:
+      - security/http_smuggling.md
+
+  - name: input_validation
+    keywords: [validation, sanitize, filter, 校验, 过滤, whitelist, blacklist]
+    files:
+      - security/input_validation.md
+
+  - name: logging
+    keywords: [log, audit, 日志, 审计日志, monitoring, 监控]
+    files:
+      - security/logging_security.md
+
+  - name: native_memory
+    keywords: [memory, buffer, overflow, 内存, native, jni, cgo, ffi, unsafe]
+    files:
+      - security/memory_native.md
+
+  - name: message_queue
+    keywords: [queue, kafka, rabbitmq, 消息队列, mq, celery, async, 异步]
+    files:
+      - security/message_queue_async.md
+
+  - name: realtime
+    keywords: [websocket, sse, realtime, 实时, socket, long polling]
+    files:
+      - security/realtime_protocols.md
+
+  - name: scheduled_tasks
+    keywords: [cron, scheduler, 定时任务, timer, job, background task]
+    files:
+      - security/scheduled_tasks.md
+
+  # ---- 区块链 / DeFi 领域 ----
+  - name: blockchain_consensus
+    keywords: [blockchain, cosmos, tendermint, cometbft, consensus, 共识, validator, 验证者, deterministic, 确定性, state hash, 状态哈希, block, epoch, finality]
+    files:
+      - security/race_conditions.md
+      - security/cryptography.md
+    notes: "共识确定性: 禁止 time.Now/map遍历/goroutine竞态/float64/rand; 所有节点状态哈希必须一致"
+
+  - name: crosschain_bridge
+    keywords: [bridge, cross-chain, 跨链, deposit, withdraw, relay, relayer, orchestrator, finality, reorg, multisig, 多签, quorum, validator signature]
+    files:
+      - security/cross_service_trust.md
+      - security/cryptography.md
+      - security/race_conditions.md
+    notes: "跨链桥: 签名quorum>2/3、去重、幂等、decimal转换、reorg处理、状态机完整性、finality等待"
+
+  - name: defi_trading
+    keywords: [DEX, trading, exchange, 交易所, order, position, 仓位, liquidation, 清算, ADL, margin, 保证金, PnL, leverage, 杠杆, orderbook, 撮合, matching, engine]
+    files:
+      - security/business_logic.md
+      - security/race_conditions.md
+    notes: "交易引擎: 订单状态机、清算公式、ADL排名确定性、穿仓处理、部分成交不变量"
+
+  - name: defi_risk_control
+    keywords: [risk control, 风控, open interest, OI, mark price, oracle, 预言机, liquidity factor, funding rate, slippage, 滑点, TWAP]
+    files:
+      - security/business_logic.md
+    notes: "风控参数: OI上限、PnL折扣、Mark Price防操纵、杠杆限制、Oracle偏差阈值"
+
+  - name: vault_defi
+    keywords: [vault, pool, share, 份额, mint, burn, deposit, withdraw, 资金池, first depositor, inflation attack, ERC4626]
+    files:
+      - security/business_logic.md
+      - security/race_conditions.md
+    notes: "Vault: share精度(first depositor attack)、舍入方向(mint向下/burn向上)、重入、CEI模式"
+
+  - name: economic_attacks
+    keywords: [flash loan, 闪电贷, MEV, front-running, sandwich, manipulation, 操纵, sybil, multi-account, 多账户, wash trading]
+    files:
+      - security/business_logic.md
+      - security/race_conditions.md
+    notes: "经济攻击: 多账户协同、浮盈操纵、低流动性代币、价格操纵、清算猎杀"
+
+  - name: onchain_key_management
+    keywords: [private key, 私钥, keyring, HSM, KMS, validator key, signer, 签名, mnemonic, 助记词]
+    files:
+      - security/cryptography.md
+    notes: "密钥管理: HSM/KMS存储、不硬编码、不记日志、私钥隔离、panic时堆栈不泄露"
+
+# ============================================================
+# Layer 4: 始终包含的核心文件
+# 这些文件提供基础审计能力，始终被引用
+# ============================================================
+core:
+  always:
+    - core/taint_analysis.md
+    - core/false_positive_filter.md
+    - core/sensitive_operations_matrix.md
+  optional:
+    - core/bypass_strategies.md
+    - core/sinks_sources.md
+    - core/poc_generation.md
+
+# ============================================================
+# Layer 5: 漏洞类别 → Wooyun 实战案例
+# 根据检测到的漏洞类型选择相关真实案例
+# ============================================================
+wooyun_cases:
+  index: wooyun/INDEX.md
+  categories:
+    sql_injection: wooyun/sql-injection.md
+    file_upload: wooyun/file-upload.md
+    command_execution: wooyun/command-execution.md
+    logic_flaws: wooyun/logic-flaws.md
+    unauthorized_access: wooyun/unauthorized-access.md
+    xss: wooyun/xss.md
+    info_disclosure: wooyun/info-disclosure.md
+    file_traversal: wooyun/file-traversal.md
+
+# ============================================================
+# Layer 6: 始终包含
+# 无论项目技术栈如何，都会包含的参考文件
+# ============================================================
+always_include:
+  - checklists/universal.md
+  - checklists/coverage_matrix.md
+  - cases/real_world_vulns.md

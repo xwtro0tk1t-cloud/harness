@@ -40,9 +40,58 @@ Use this template to generate the project's CLAUDE.md. Target ≤ 100 lines.
 |-------|---------|
 | {{skill_name}} | {{skill_description}} |
 
+## Skill Factory (Generate New Skills On Demand)
+
+| Generator | Use Case | Invocation |
+|-----------|----------|-----------|
+| security-review-skill-creator | Project-specific security audit rules | "Generate a security audit skill for this project" |
+| skill-creator | Codify workflows into Skills | "Create a skill for XX" |
+| claudeception | Extract experience into Skills | "/claudeception" |
+
+## Harness Commands
+
+| Command | Description |
+|---------|-------------|
+| harness help | Command index + scenario quick ref |
+| harness audit | Project health check |
+| harness quality gate | Pre-commit quality gate |
+| harness guide | Skill recommendation |
+
 ## Agent Team
 
 | Role | Definition |
 |------|-----------|
 | {{role}} | [.harness/agents/{{role}}.md](.harness/agents/{{role}}.md) |
+
+## Token Budget
+
+- /compact at Phase completion boundaries; re-read task_plan.md after compact
+- Large files (>300 lines): use offset+limit for segmented reading
+- Structured output (JSON/tables) preferred over long-form prose
+- Read indexes (INDEX.md) first, then read leaf docs on demand
+
+## Behavior Rules
+
+### MUST (Mandatory)
+- MUST brainstorm before coding (HARD-GATE)
+- MUST write tests before implementation (TDD)
+- MUST security review before committing
+- MUST NOT eval()/exec() with user input — CWE-95
+- MUST NOT shell=True with user arguments — CWE-78
+- MUST NOT f-string/format SQL concatenation — CWE-89
+- MUST NOT commit .env / *.key / *.pem — CWE-798
+- MUST NOT leave dead code / debug output
+- MUST NOT claim done without verification
+
+### Efficiency Rules
+- /compact at Phase boundaries, not mid-task
+- Re-read task_plan.md after compact
+- Large files (>300 lines): use offset+limit
+
+<!-- Enterprise mode appends:
+### HOOK Enforcement (system-level, cannot be bypassed when enabled)
+- git commit auto-check: secrets / sensitive files / commit format
+- Code write auto-scan: eval/exec/shell=True/SQL concat/XSS/hardcoded credentials
+- Dangerous command interception: data exfiltration / destructive operations / credential theft
+-->
 ```

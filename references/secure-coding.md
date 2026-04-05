@@ -203,3 +203,7 @@ The following operations are permitted in **explicitly authorized** security tes
 4. **Defensive Verification**: Verify whether own system's security defenses are effective
 
 **Judgment principle**: If the target is "own system defense" it's permitted; if the target is "external system attack" it's forbidden.
+
+---
+
+> **Enterprise users**: Enable Hook D (write-security-scan) to automatically detect the security anti-patterns listed above at code write time, outputting real-time WARNINGs with CWE IDs and fix suggestions. See `references/hook-scripts.md` for details.

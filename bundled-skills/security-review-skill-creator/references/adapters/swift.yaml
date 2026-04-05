@@ -1,0 +1,301 @@
+# Swift/iOS Security Controls Adapter
+# Swift/iOS 安全控制适配器
+#
+# 定义 Swift + iOS 生态系统中各安全控制的检测模式
+# 支持: UIKit, SwiftUI, Foundation, Security.framework, Alamofire, URLSession
+#
+# 版本: 1.0.0
+
+language: swift
+file_extensions:
+  - ".swift"
+
+additional_files:
+  - "Info.plist"
+  - "*.entitlements"
+  - "*.xcconfig"
+  - "Podfile"
+  - "Package.swift"
+
+# ============================================================================
+# 安全控制检测模式 (Control Detection Patterns)
+# ============================================================================
+
+control_patterns:
+  # ---------------------------------------------------------------------------
+  # 身份认证 (Authentication)
+  # ---------------------------------------------------------------------------
+  authentication:
+    biometric:
+      - 'LAContext'
+      - 'evaluatePolicy'
+      - 'canEvaluatePolicy'
+      - 'deviceOwnerAuthenticationWithBiometrics'
+      - 'deviceOwnerAuthentication'
+
+    credential:
+      - 'ASAuthorizationController'  # Sign in with Apple
+      - 'ASAuthorizationAppleIDProvider'
+      - 'GIDSignIn'  # Google Sign-In
+      - 'FIRAuth'  # Firebase
+
+    token:
+      - 'UserDefaults.*token'
+      - 'Keychain.*token'
+      - 'Authorization.*Bearer'
+      - 'JWT|jwt'
+      - 'refreshToken|accessToken'
+
+  # ---------------------------------------------------------------------------
+  # 授权检查 (Authorization)
+  # ---------------------------------------------------------------------------
+  authorization:
+    entitlements:
+      - 'com\.apple\.security\.'
+      - 'com\.apple\.developer\.'
+      - 'aps-environment'
+      - 'keychain-access-groups'
+
+    app_transport_security:
+      - 'NSAppTransportSecurity'
+      - 'NSAllowsArbitraryLoads'
+      - 'NSExceptionDomains'
+      - 'NSTemporaryExceptionAllowsInsecureHTTPLoads'
+
+  # ---------------------------------------------------------------------------
+  # 资源所有权验证 (Ownership Check)
+  # ---------------------------------------------------------------------------
+  ownership_check:
+    patterns:
+      - 'currentUser\.uid'
+      - 'Auth\.auth\(\)\.currentUser'
+      - 'userId\s*==\s*'
+      - 'ownerId\s*==\s*'
+
+  # ---------------------------------------------------------------------------
+  # 输入验证 (Input Validation)
+  # ---------------------------------------------------------------------------
+  input_validation:
+    url_scheme:
+      - 'func application.*open url'
+      - 'func scene.*openURLContexts'
+      - 'UIApplication.*openURL'
+      - 'url\.host|url\.path|url\.query'
+      - 'URLComponents'
+
+    universal_links:
+      - 'func application.*continue userActivity'
+      - 'NSUserActivity'
+      - 'webpageURL'
+      - 'apple-app-site-association'
+
+    general:
+      - 'guard\s+let'
+      - 'guard\s+.*else'
+      - 'precondition\('
+      - 'assert\('
+      - 'NSRegularExpression'
+      - '\.wholeMatch\('
+
+  # ---------------------------------------------------------------------------
+  # 安全存储 (Secure Storage)
+  # ---------------------------------------------------------------------------
+  secure_storage:
+    keychain:
+      - 'SecItemAdd'
+      - 'SecItemUpdate'
+      - 'SecItemCopyMatching'
+      - 'SecItemDelete'
+      - 'kSecClass'
+      - 'kSecAttrAccessible'
+      - 'kSecAttrAccessControl'
+      - 'KeychainAccess'  # popular library
+      - 'SwiftKeychainWrapper'
+
+    data_protection:
+      - 'FileProtectionType'
+      - 'completeFileProtection'
+      - 'NSFileProtectionComplete'
+      - 'NSDataWritingFileProtectionComplete'
+
+    unsafe:  # 反向检测
+      - 'UserDefaults'  # 不应存储敏感数据
+      - 'NSUserDefaults'
+      - 'FileManager.*write'  # 明文文件
+      - 'plist'  # 明文 plist
+
+  # ---------------------------------------------------------------------------
+  # 网络安全 (Network Security)
+  # ---------------------------------------------------------------------------
+  network_security:
+    tls:
+      - 'NSAppTransportSecurity'
+      - 'URLSession'
+      - 'ServerTrust'
+      - 'SecTrust'
+      - 'URLAuthenticationChallenge'
+      - 'TrustKit'
+      - 'pinnedCertificates'
+
+    unsafe:  # 反向检测
+      - 'NSAllowsArbitraryLoads.*true'
+      - 'NSExceptionAllowsInsecureHTTPLoads.*true'
+      - 'ServerTrustPolicy\.disableEvaluation'
+      - 'urlSession.*didReceive challenge.*completionHandler\(\.useCredential'
+      - 'AlamofireExtension.*disable'
+
+  # ---------------------------------------------------------------------------
+  # WebView 安全 (WKWebView Security)
+  # ---------------------------------------------------------------------------
+  webview_security:
+    dangerous:
+      - 'WKWebView'
+      - 'evaluateJavaScript'
+      - 'WKUserScript'
+      - 'WKScriptMessageHandler'
+      - 'javaScriptEnabled'
+      - 'allowsInlineMediaPlayback'
+
+    safe:
+      - 'decidePolicyFor navigationAction'
+      - 'WKNavigationDelegate'
+      - 'WKContentRuleListStore'
+
+  # ---------------------------------------------------------------------------
+  # 审计日志 (Audit Logging)
+  # ---------------------------------------------------------------------------
+  audit_log:
+    patterns:
+      - 'os_log\('
+      - 'Logger\('
+      - 'NSLog\('
+      - 'print\('  # debug only
+      - 'OSLog'
+
+  # ---------------------------------------------------------------------------
+  # 安全传输 (Secure Transport)
+  # ---------------------------------------------------------------------------
+  secure_transport:
+    patterns:
+      - 'https://'
+      - 'URLSession'
+      - 'Alamofire'
+      - 'NSAppTransportSecurity'
+      - 'SecTrustEvaluateWithError'
+
+  # ---------------------------------------------------------------------------
+  # 会话管理 (Session Management)
+  # ---------------------------------------------------------------------------
+  session_management:
+    patterns:
+      - 'HTTPCookieStorage'
+      - 'HTTPCookie'
+      - 'WKWebsiteDataStore'
+      - 'URLSession\.shared\.reset'
+      - 'logout|signOut'
+
+  # ---------------------------------------------------------------------------
+  # 错误处理 (Error Handling)
+  # ---------------------------------------------------------------------------
+  error_handling:
+    patterns:
+      - 'do\s*\{'
+      - 'catch\s*\{'
+      - 'try\?'
+      - 'try!'  # 反向检测 — 可能 crash
+      - 'Result<'
+      - 'throws'
+
+  # ---------------------------------------------------------------------------
+  # 数据库安全 (Database Security)
+  # ---------------------------------------------------------------------------
+  parameterized_query:
+    patterns:
+      - 'sqlite3_bind'
+      - 'GRDB'
+      - 'CoreData'
+      - 'NSPredicate.*%@'
+      - 'NSFetchRequest'
+      - 'SQLite\.swift'
+
+  # ---------------------------------------------------------------------------
+  # 文件操作 (File Operations)
+  # ---------------------------------------------------------------------------
+  file_operations_crud:
+    create:
+      - 'FileManager.*createFile'
+      - 'Data.*write\(to'
+      - 'FileHandle.*write'
+      - 'NSKeyedArchiver'
+    read:
+      - 'FileManager.*contents\(atPath'
+      - 'Data\(contentsOf'
+      - 'FileHandle.*readData'
+      - 'NSKeyedUnarchiver'
+    delete:
+      - 'FileManager.*removeItem'
+      - 'FileManager.*removeFile'
+
+# ============================================================================
+# 敏感操作识别模式 (Sensitive Operation Patterns)
+# ============================================================================
+
+operation_patterns:
+  method_patterns:
+    sensitive_data:
+      - 'func.*password|func.*token|func.*secret|func.*key'
+      - 'func.*credential|func.*auth'
+      - 'func.*payment|func.*transfer'
+
+    ipc:
+      - 'UIApplication\.shared\.open'
+      - 'openURL'
+      - 'canOpenURL'
+      - 'UIPasteboard'
+      - 'NSExtensionContext'
+      - 'NSItemProvider'
+
+    dangerous:
+      - 'Process\(\)'  # subprocess execution
+      - 'NSTask'
+      - 'dlopen\('
+      - 'objc_msgSend'
+      - 'NSClassFromString'
+      - 'perform\(#selector'
+      - 'UnsafeRawPointer|UnsafeMutablePointer'
+
+  plist_patterns:
+    url_schemes:
+      - 'CFBundleURLSchemes'
+      - 'CFBundleURLTypes'
+    queries:
+      - 'LSApplicationQueriesSchemes'
+    exports:
+      - 'UIBackgroundModes'
+      - 'NSExtension'
+
+# ============================================================================
+# 框架特定配置 (Framework-Specific Configuration)
+# ============================================================================
+
+frameworks:
+  uikit:
+    config_files:
+      - 'Info.plist'
+      - '*.entitlements'
+    lifecycle: 'AppDelegate|SceneDelegate'
+
+  swiftui:
+    lifecycle: '@main|App.swift'
+
+  alamofire:
+    patterns:
+      - 'AF\.'
+      - 'Session\.'
+      - 'ServerTrustManager'
+
+  realm:
+    patterns:
+      - 'Realm\('
+      - 'encryptionKey'
+      - 'Realm\.Configuration'

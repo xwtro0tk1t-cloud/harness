@@ -26,6 +26,18 @@ Rules:
 - Use English, start with verb infinitive (add / fix / update / remove)
 - One commit does one thing
 - Don't commit .env / secrets / large binary files
+- Scope is optional, common values: auth / api / db / ui / config / ci / deps
+
+Examples:
+```
+feat(auth): add OAuth2 login support
+fix(api): handle null response from payment gateway
+refactor(db): extract connection pooling to shared module
+docs: update API reference for v2 endpoints
+security(deps): upgrade lodash to fix prototype pollution
+```
+
+> **Enterprise users**: Enable Hook B (commit-msg-check) for automatic format validation, see `references/hook-scripts.md`.
 
 ### Testing Convention
 
@@ -246,6 +258,39 @@ Best for: bug fixes, small changes, exploratory tasks
 
 **"Iron Law" (from superpowers)**:
 > NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE. "I think it's fine" doesn't count as evidence.
+
+---
+
+## Part D: Token Optimization Strategies
+
+The following rules help AI Agents use their token budget efficiently and avoid context window waste.
+
+### Model Routing (Recommended)
+
+| Task Type | Recommended Model | Notes |
+|-----------|-------------------|-------|
+| Routing / classification / simple Q&A | Haiku | Low cost, fast |
+| Daily development / Code Review / docs | Sonnet | Best cost-performance ratio |
+| Deep security audit / architecture design / complex debugging | Opus | Strongest reasoning capability |
+
+### /compact Strategy
+
+- Execute `/compact` at Phase completion boundaries (e.g., all tests pass, PR submitted)
+- After compact, MUST re-read `task_plan.md` (to prevent plan loss)
+- Do not compact mid-task (will lose critical context)
+
+### Context Budget Management
+
+- MCP active tools ≤ 80 (exceeding this wastes significant tokens on tool schemas)
+- Large files (>300 lines): use `offset` + `limit` for segmented reading, never read in full
+- Read index files (INDEX.md) first to locate targets, then read leaf documents on demand
+- Code search: prefer Grep/Glob tools over full-file cat
+
+### Structured Output First
+
+- Analysis results in JSON / tables / lists, not long-form prose
+- Status reports use checklists (`- [x]` / `- [ ]`), not paragraphs
+- Code change descriptions use diff or file:line-number format, don't restate full content
 
 ---
 

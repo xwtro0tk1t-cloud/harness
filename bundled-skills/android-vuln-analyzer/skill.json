@@ -1,0 +1,31 @@
+{
+  "name": "android-vuln-analyzer",
+  "displayName": "Android Vulnerability Analyzer",
+  "version": "2.0.0",
+  "description": "Automated Android vulnerability analysis, reproduction, and hunting framework. Supports both reproducing known vulnerabilities from reports and actively hunting for specific vulnerability types using pre-built patterns.",
+  "author": "Security Research",
+  "tags": ["security", "android", "vulnerability", "pentest", "mobile", "hunting", "0day"],
+  "capabilities": [
+    "Vulnerability reproduction from reports (CVE, bug bounty reports)",
+    "Targeted vulnerability hunting (SQL injection, secrets, WebView, etc.)",
+    "Android APK analysis and decompilation",
+    "Exported component vulnerability detection",
+    "WebView JavaScript Bridge analysis",
+    "Hardcoded secrets detection (API keys, credentials)",
+    "SQL injection and path traversal detection",
+    "Deep link hijacking analysis",
+    "Automated exploit generation",
+    "Comprehensive security reporting with CVSS scoring",
+    "Knowledge base generation (prompt.md for future reuse)"
+  ],
+  "requirements": {
+    "tools": ["adb", "jadx", "openssl"],
+    "optional": ["frida", "objection"]
+  },
+  "examples": [
+    "Analyze an Android APK for exported Activity vulnerabilities",
+    "Test WebView JavaScript Bridge security",
+    "Generate exploit PoC for account takeover",
+    "Create comprehensive vulnerability report"
+  ]
+}

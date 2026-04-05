@@ -1,0 +1,333 @@
+# Kotlin/Android Security Controls Adapter
+# Kotlin/Android 安全控制适配器
+#
+# 定义 Kotlin + Android 生态系统中各安全控制的检测模式
+# 支持: Android SDK, Jetpack, Kotlin Coroutines, OkHttp, Retrofit
+#
+# 版本: 1.0.0
+
+language: kotlin
+file_extensions:
+  - ".kt"
+  - ".kts"
+
+additional_files:
+  - "AndroidManifest.xml"
+  - "build.gradle"
+  - "build.gradle.kts"
+  - "network_security_config.xml"
+  - "res/xml/*.xml"
+
+# ============================================================================
+# 安全控制检测模式 (Control Detection Patterns)
+# ============================================================================
+
+control_patterns:
+  # ---------------------------------------------------------------------------
+  # 身份认证 (Authentication)
+  # ---------------------------------------------------------------------------
+  authentication:
+    biometric:
+      - 'BiometricPrompt'
+      - 'BiometricManager'
+      - 'KeyguardManager'
+      - 'setUserAuthenticationRequired\(true\)'
+      - 'FingerprintManager'  # deprecated but still in use
+
+    credential:
+      - 'AccountManager'
+      - 'CredentialManager'
+      - 'GoogleSignIn'
+      - 'FirebaseAuth'
+      - 'signInWith'
+
+    token:
+      - 'SharedPreferences.*token'
+      - 'EncryptedSharedPreferences.*token'
+      - 'Authorization.*Bearer'
+      - 'JWT|jwt'
+      - 'refreshToken|accessToken'
+
+  # ---------------------------------------------------------------------------
+  # 授权检查 (Authorization)
+  # ---------------------------------------------------------------------------
+  authorization:
+    permissions:
+      - 'checkSelfPermission'
+      - 'requestPermissions'
+      - 'shouldShowRequestPermissionRationale'
+      - 'android\.permission\.'
+      - 'ContextCompat\.checkSelfPermission'
+
+    component_protection:
+      - 'android:permission='
+      - 'android:exported="false"'
+      - 'enforceCallingPermission'
+      - 'enforceCallingOrSelfPermission'
+      - 'checkCallingPermission'
+
+    content_provider:
+      - 'android:readPermission='
+      - 'android:writePermission='
+      - 'android:grantUriPermissions'
+      - 'path-permission'
+
+  # ---------------------------------------------------------------------------
+  # 资源所有权验证 (Ownership Check)
+  # ---------------------------------------------------------------------------
+  ownership_check:
+    patterns:
+      - 'currentUser\.uid'
+      - 'FirebaseAuth\..*currentUser'
+      - 'userId\s*==\s*'
+      - 'ownerId\s*==\s*'
+      - 'belongsToUser'
+
+  # ---------------------------------------------------------------------------
+  # 输入验证 (Input Validation)
+  # ---------------------------------------------------------------------------
+  input_validation:
+    intent:
+      - 'intent\.get.*Extra'
+      - 'intent\.data'
+      - 'intent\.action'
+      - 'requireNotNull'
+      - 'intent\.hasExtra'
+      - 'Bundle\.get'
+
+    uri:
+      - 'Uri\.parse'
+      - 'intent\.data\?\.host'
+      - 'intent\.data\?\.path'
+      - 'intent\.data\?\.getQueryParameter'
+      - 'URL\('
+
+    general:
+      - 'require\('
+      - 'check\('
+      - 'Regex\('
+      - 'matches\('
+      - 'isNullOrEmpty\(\)|isNullOrBlank\(\)'
+      - 'toIntOrNull\(\)|toLongOrNull\(\)'
+
+  # ---------------------------------------------------------------------------
+  # 安全存储 (Secure Storage)
+  # ---------------------------------------------------------------------------
+  secure_storage:
+    android_keystore:
+      - 'AndroidKeyStore'
+      - 'KeyStore\.getInstance'
+      - 'KeyGenParameterSpec'
+      - 'setUserAuthenticationRequired'
+      - 'PURPOSE_ENCRYPT\|PURPOSE_DECRYPT'
+
+    encrypted_prefs:
+      - 'EncryptedSharedPreferences'
+      - 'MasterKey'
+      - 'MasterKeys'
+      - 'EncryptedFile'
+
+    unsafe:  # 反向检测 — 不应存储敏感数据
+      - 'getSharedPreferences'  # 明文 SharedPreferences
+      - 'openFileOutput'
+      - 'SQLiteDatabase'
+      - 'Room\.databaseBuilder'
+
+  # ---------------------------------------------------------------------------
+  # 网络安全 (Network Security)
+  # ---------------------------------------------------------------------------
+  network_security:
+    tls:
+      - 'network_security_config'
+      - 'cleartextTrafficPermitted'
+      - 'CertificatePinner'
+      - 'certificatePinner'
+      - 'OkHttpClient.*sslSocketFactory'
+      - 'TrustManager'
+      - 'X509TrustManager'
+      - 'hostnameVerifier'
+
+    unsafe:  # 反向检测
+      - 'ALLOW_ALL_HOSTNAME_VERIFIER'
+      - 'trustAllCerts'
+      - 'SSLSocketFactory.*ALLOW'
+      - 'cleartextTrafficPermitted.*true'
+      - 'usesCleartextTraffic.*true'
+
+  # ---------------------------------------------------------------------------
+  # WebView 安全 (WebView Security)
+  # ---------------------------------------------------------------------------
+  webview_security:
+    dangerous:  # 反向检测
+      - 'setJavaScriptEnabled\(true\)'
+      - 'addJavascriptInterface'
+      - 'setAllowFileAccess\(true\)'
+      - 'setAllowFileAccessFromFileURLs\(true\)'
+      - 'setAllowUniversalAccessFromFileURLs\(true\)'
+      - 'setAllowContentAccess\(true\)'
+      - '@JavascriptInterface'
+
+    safe:
+      - 'setJavaScriptEnabled\(false\)'
+      - 'setAllowFileAccess\(false\)'
+      - 'shouldOverrideUrlLoading'
+      - 'WebViewClient'
+
+  # ---------------------------------------------------------------------------
+  # 审计日志 (Audit Logging)
+  # ---------------------------------------------------------------------------
+  audit_log:
+    patterns:
+      - 'Log\.(d|i|w|e|v)\('
+      - 'Timber\.'
+      - 'Logger\.'
+      - 'FirebaseCrashlytics'
+
+  # ---------------------------------------------------------------------------
+  # 速率限制 (Rate Limiting - client side)
+  # ---------------------------------------------------------------------------
+  rate_limit:
+    patterns:
+      - 'debounce'
+      - 'throttle'
+      - 'RateLimiter'
+      - 'delay\('
+
+  # ---------------------------------------------------------------------------
+  # 安全传输 (Secure Transport)
+  # ---------------------------------------------------------------------------
+  secure_transport:
+    patterns:
+      - 'https://'
+      - 'CertificatePinner'
+      - 'network_security_config'
+      - 'OkHttpClient.*Builder'
+      - 'Retrofit\.Builder'
+
+  # ---------------------------------------------------------------------------
+  # 会话管理 (Session Management)
+  # ---------------------------------------------------------------------------
+  session_management:
+    patterns:
+      - 'CookieManager'
+      - 'clearCookies'
+      - 'sessionTimeout'
+      - 'tokenExpiry|tokenExpiration'
+      - 'refreshToken'
+      - 'logout|signOut'
+
+  # ---------------------------------------------------------------------------
+  # 错误处理 (Error Handling)
+  # ---------------------------------------------------------------------------
+  error_handling:
+    patterns:
+      - 'try\s*\{'
+      - 'catch\s*\('
+      - 'runCatching'
+      - 'Result\.'
+      - 'CoroutineExceptionHandler'
+      - 'Thread\.setDefaultUncaughtExceptionHandler'
+
+  # ---------------------------------------------------------------------------
+  # 数据库安全 (Database Security)
+  # ---------------------------------------------------------------------------
+  parameterized_query:
+    patterns:
+      - '@Query.*:' # Room DAO parameterized
+      - 'rawQuery.*\?'
+      - 'SimpleSQLiteQuery'
+      - 'SupportSQLiteQuery'
+      - 'selectionArgs'
+      - 'ContentValues'
+
+  # ---------------------------------------------------------------------------
+  # 文件操作 (File Operations)
+  # ---------------------------------------------------------------------------
+  file_operations_crud:
+    create:
+      - 'openFileOutput'
+      - 'File\(.*\.createNewFile'
+      - 'FileOutputStream'
+      - 'ContentResolver.*insert'
+    read:
+      - 'openFileInput'
+      - 'FileInputStream'
+      - 'ContentResolver.*query'
+      - 'ContentResolver.*openInputStream'
+    delete:  # ⚠️ 易遗漏！
+      - 'File\(.*\.delete\('
+      - 'ContentResolver.*delete'
+      - 'context\.deleteFile'
+
+# ============================================================================
+# 敏感操作识别模式 (Sensitive Operation Patterns)
+# ============================================================================
+
+operation_patterns:
+  method_patterns:
+    sensitive_data:
+      - 'fun.*Password|fun.*Token|fun.*Secret|fun.*Key'
+      - 'fun.*Credential|fun.*Auth'
+      - 'fun.*Payment|fun.*Transfer'
+
+    ipc:
+      - 'startActivity\('
+      - 'startActivityForResult\('
+      - 'sendBroadcast\('
+      - 'startService\('
+      - 'bindService\('
+      - 'ContentResolver'
+
+    dangerous:
+      - 'Runtime\.getRuntime\(\)\.exec'
+      - 'ProcessBuilder'
+      - 'DexClassLoader'
+      - 'PathClassLoader'
+      - 'Class\.forName'
+      - 'Method\.invoke'
+
+  component_patterns:
+    activity:
+      - 'android:exported="true"'
+      - '<intent-filter>'  # implicit export
+      - 'android:launchMode'
+    service:
+      - '<service.*exported="true"'
+      - 'android:process='
+    receiver:
+      - '<receiver.*exported="true"'
+      - 'android:permission='
+    provider:
+      - '<provider.*exported="true"'
+      - 'android:authorities='
+      - 'android:grantUriPermissions'
+
+# ============================================================================
+# 框架特定配置 (Framework-Specific Configuration)
+# ============================================================================
+
+frameworks:
+  android_sdk:
+    config_files:
+      - 'AndroidManifest.xml'
+      - 'res/xml/network_security_config.xml'
+      - 'build.gradle'
+      - 'build.gradle.kts'
+    security_location: '**/security/**'
+
+  jetpack:
+    biometric: 'androidx.biometric'
+    crypto: 'androidx.security.crypto'
+    room: 'androidx.room'
+
+  okhttp:
+    patterns:
+      - 'OkHttpClient\.Builder'
+      - 'Interceptor'
+      - 'CertificatePinner'
+
+  retrofit:
+    patterns:
+      - 'Retrofit\.Builder'
+      - '@GET|@POST|@PUT|@DELETE|@PATCH'
+      - '@Header|@Headers'

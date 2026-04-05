@@ -1,0 +1,283 @@
+# Dart/Flutter Security Controls Adapter
+# Dart/Flutter 安全控制适配器
+#
+# 定义 Dart + Flutter 生态系统中各安全控制的检测模式
+# 支持: Flutter SDK, dio, http, go_router, sqflite, flutter_secure_storage
+#
+# 版本: 1.0.0
+
+language: dart
+file_extensions:
+  - ".dart"
+
+additional_files:
+  - "pubspec.yaml"
+  - "pubspec.lock"
+  - "AndroidManifest.xml"
+  - "Info.plist"
+  - "network_security_config.xml"
+
+# ============================================================================
+# 安全控制检测模式 (Control Detection Patterns)
+# ============================================================================
+
+control_patterns:
+  # ---------------------------------------------------------------------------
+  # 身份认证 (Authentication)
+  # ---------------------------------------------------------------------------
+  authentication:
+    biometric:
+      - 'local_auth'
+      - 'LocalAuthentication'
+      - 'authenticateWithBiometrics'
+      - 'authenticate\('
+      - 'BiometricType'
+
+    credential:
+      - 'firebase_auth'
+      - 'FirebaseAuth'
+      - 'signInWith'
+      - 'GoogleSignIn'
+      - 'AppleSignIn'
+
+    token:
+      - 'flutter_secure_storage'
+      - 'FlutterSecureStorage'
+      - 'SecureStorage'
+      - 'Authorization.*Bearer'
+      - 'refreshToken|accessToken'
+
+  # ---------------------------------------------------------------------------
+  # 授权检查 (Authorization)
+  # ---------------------------------------------------------------------------
+  authorization:
+    route_guard:
+      - 'redirect:'  # go_router redirect
+      - 'RouteGuard'
+      - 'AuthGuard'
+      - 'NavigatorObserver'
+      - 'onGenerateRoute.*auth'
+
+    permissions:
+      - 'permission_handler'
+      - 'Permission\.'
+      - 'request\(\)'
+      - 'isGranted|isDenied'
+
+  # ---------------------------------------------------------------------------
+  # 输入验证 (Input Validation)
+  # ---------------------------------------------------------------------------
+  input_validation:
+    deep_link:
+      - 'onGenerateRoute'
+      - 'uni_links'
+      - 'go_router'
+      - 'auto_route'
+      - 'Linking\.getInitialURL'
+      - 'getInitialUri'
+
+    form:
+      - 'TextFormField.*validator'
+      - 'FormField.*validator'
+      - 'GlobalKey<FormState>'
+      - 'validate\(\)'
+      - 'RegExp\('
+
+    general:
+      - 'Uri\.parse'
+      - 'int\.tryParse|double\.tryParse'
+      - 'jsonDecode'
+
+  # ---------------------------------------------------------------------------
+  # 安全存储 (Secure Storage)
+  # ---------------------------------------------------------------------------
+  secure_storage:
+    encrypted:
+      - 'flutter_secure_storage'
+      - 'FlutterSecureStorage'
+      - 'SecureStorage'
+      - 'encrypted_shared_preferences'
+      - 'Hive\..*encryptionCipher'
+
+    unsafe:  # 反向检测
+      - 'SharedPreferences'  # 明文
+      - 'getSharedPreferences'
+      - 'Hive\.openBox\('  # 无加密参数
+      - 'sqflite.*openDatabase'  # 无加密
+
+  # ---------------------------------------------------------------------------
+  # 网络安全 (Network Security)
+  # ---------------------------------------------------------------------------
+  network_security:
+    tls:
+      - 'SecurityContext'
+      - 'HttpClient.*badCertificateCallback'
+      - 'CertificatePinner'
+      - 'dio.*CertificatePinner'
+      - 'network_security_config'
+
+    unsafe:  # 反向检测
+      - 'badCertificateCallback.*return true'
+      - 'badCertificateCallback.*=> true'
+      - 'allowLegacyTLS'
+      - 'cleartextTrafficPermitted.*true'
+      - 'NSAllowsArbitraryLoads.*true'
+
+  # ---------------------------------------------------------------------------
+  # WebView 安全 (WebView Security)
+  # ---------------------------------------------------------------------------
+  webview_security:
+    dangerous:
+      - 'WebViewController'
+      - 'InAppWebView'
+      - 'JavascriptChannel'
+      - 'runJavaScript\('
+      - 'evaluateJavascript\('
+      - 'loadUrl\('
+      - 'onJsAlert|onJsConfirm'
+
+    safe:
+      - 'navigationDelegate'
+      - 'NavigationDecision\.prevent'
+      - 'allowsInlineMediaPlayback.*false'
+
+  # ---------------------------------------------------------------------------
+  # Platform Channel 安全 (Platform Channel Security)
+  # ---------------------------------------------------------------------------
+  platform_channel:
+    patterns:
+      - 'MethodChannel\('
+      - 'EventChannel\('
+      - 'BasicMessageChannel\('
+      - 'invokeMethod\('
+      - 'setMethodCallHandler\('
+      - 'receiveBroadcastStream\('
+
+  # ---------------------------------------------------------------------------
+  # 审计日志 (Audit Logging)
+  # ---------------------------------------------------------------------------
+  audit_log:
+    patterns:
+      - 'print\('
+      - 'debugPrint\('
+      - 'log\('
+      - 'Logger\.'
+      - 'FirebaseCrashlytics'
+
+  # ---------------------------------------------------------------------------
+  # 速率限制 (Rate Limiting)
+  # ---------------------------------------------------------------------------
+  rate_limit:
+    patterns:
+      - 'debounce'
+      - 'throttle'
+      - 'Timer\.'
+      - 'Debouncer'
+
+  # ---------------------------------------------------------------------------
+  # 错误处理 (Error Handling)
+  # ---------------------------------------------------------------------------
+  error_handling:
+    patterns:
+      - 'try\s*\{'
+      - 'catch\s*\('
+      - 'catchError\('
+      - 'onError:'
+      - 'FlutterError\.onError'
+      - 'PlatformDispatcher\..*onError'
+      - 'runZonedGuarded'
+
+  # ---------------------------------------------------------------------------
+  # 数据库安全 (Database Security)
+  # ---------------------------------------------------------------------------
+  parameterized_query:
+    patterns:
+      - 'rawQuery.*\?'  # sqflite parameterized
+      - 'query\(.*where:.*whereArgs:'  # sqflite safe API
+      - 'insert\(.*ConflictAlgorithm'
+      - 'Isar.*filter\(\)'
+      - 'floor_entity'  # Floor ORM (safe by default)
+
+  # ---------------------------------------------------------------------------
+  # 文件操作 (File Operations)
+  # ---------------------------------------------------------------------------
+  file_operations_crud:
+    create:
+      - 'File\(.*\.writeAsString'
+      - 'File\(.*\.writeAsBytes'
+      - 'File\(.*\.create\('
+      - 'IOSink'
+    read:
+      - 'File\(.*\.readAsString'
+      - 'File\(.*\.readAsBytes'
+      - 'File\(.*\.readAsLines'
+      - 'rootBundle\.load'
+    delete:
+      - 'File\(.*\.delete\('
+      - 'Directory\(.*\.delete\('
+
+# ============================================================================
+# 敏感操作识别模式 (Sensitive Operation Patterns)
+# ============================================================================
+
+operation_patterns:
+  method_patterns:
+    sensitive_data:
+      - 'password|Password'
+      - 'token|Token'
+      - 'secret|Secret'
+      - 'apiKey|ApiKey'
+      - 'credential|Credential'
+
+    platform_invoke:
+      - 'invokeMethod\('
+      - 'invokeMapMethod\('
+      - 'invokeListMethod\('
+
+    dangerous:
+      - 'Process\.run\('
+      - 'Process\.start\('
+      - 'dart:ffi'
+      - 'DynamicLibrary'
+      - 'Pointer<'
+      - 'dart:mirrors'
+
+  route_patterns:
+    go_router:
+      - 'GoRoute\('
+      - 'path:'
+      - 'redirect:'
+    auto_route:
+      - '@RoutePage\('
+      - 'AutoRoute\('
+    navigator:
+      - 'Navigator\.'
+      - 'pushNamed\('
+      - 'onGenerateRoute'
+
+# ============================================================================
+# 框架特定配置 (Framework-Specific Configuration)
+# ============================================================================
+
+frameworks:
+  flutter:
+    config_files:
+      - 'pubspec.yaml'
+      - 'android/app/src/main/AndroidManifest.xml'
+      - 'ios/Runner/Info.plist'
+      - 'android/app/src/main/res/xml/network_security_config.xml'
+    build_config: 'build.gradle'
+
+  dio:
+    patterns:
+      - 'Dio\('
+      - 'BaseOptions'
+      - 'Interceptor'
+      - 'CertificatePinner'
+
+  go_router:
+    patterns:
+      - 'GoRouter\('
+      - 'GoRoute\('
+      - 'redirect:'
+      - 'refreshListenable'

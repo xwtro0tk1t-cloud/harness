@@ -176,6 +176,8 @@ chmod +x ~/.claude/hooks/claudeception-activator.sh
 | Infrastructure | | security-review-skill-for-docker/terraform |
 | Security team | supply-chain-audit, skills-audit | sca-ai-denoise |
 
+> **Note**: Language-specific coding conventions are built into `references/lang-patterns.md` (covering Python/JS/TS/Go/Java/Rust/Docker). During Harness initialization, they are automatically tailored to the detected tech stack and injected into `docs/conventions/coding-patterns.md` — no additional skill installation needed.
+
 ---
 
 ## Project-Specific Skills

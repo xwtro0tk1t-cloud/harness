@@ -1,0 +1,193 @@
+# Skill Audit 配置文件
+# 用于 Claude Code Skill 环境
+
+# ========== 路径配置 ==========
+paths:
+  # Skill 根目录（自动检测，通常不需要修改）
+  # 留空则自动使用 SKILL.md 所在目录
+  skill_root: null
+
+  # 报告输出目录（相对于 skill_root 或绝对路径）
+  report_dir: reports
+
+  # 日志目录（相对于 skill_root 或绝对路径）
+  log_dir: logs
+
+# ========== LLM 配置 ==========
+llm:
+  # LLM 提供商: anthropic, openai, custom
+  provider: anthropic
+
+  # 模型名称（推荐使用 Sonnet 获得更好的检测效果）
+  model: claude-sonnet-4-5-20250929
+
+  # API Key（从环境变量读取）
+  # 设置环境变量: export ANTHROPIC_AUTH_TOKEN=your_api_key
+  api_key: ${ANTHROPIC_AUTH_TOKEN}
+
+  # API 端点（从环境变量读取）
+  # 设置环境变量: export ANTHROPIC_BASE_URL=https://your-api-endpoint.com
+  base_url: ${ANTHROPIC_BASE_URL}
+
+  # 采样温度（0.0 = 确定性输出）
+  temperature: 0.0
+
+  # 最大 tokens
+  max_tokens: 10000
+
+  # 超时时间（秒）
+  timeout: 60
+
+# ========== 威胁情报配置 ==========
+threat_intel:
+  # 威胁情报提供商: threatbook, custom
+  provider: threatbook
+
+  # API Key（优先从环境变量读取）
+  api_key: ${THREATBOOK_API_KEY}
+
+  # 是否启用威胁情报检查
+  enabled: false
+
+  # API 超时时间（秒）
+  timeout: 30
+
+  # 最大批量查询数量
+  batch_limit: 100
+
+# ========== 分析阶段控制 ==========
+# NOTE: The `phases` section is intentionally removed.
+# Scan mode is controlled exclusively by the --mode flag (deep/standard/fast/expert).
+# The scan_modes presets below define which phases are enabled for each mode.
+# This prevents phases config from silently overriding the --mode parameter.
+
+# ========== 扫描模式预设 ==========
+# 可以通过环境变量 SCAN_MODE 选择模式
+scan_modes:
+  # 快速模式：仅静态分析（默认）
+  fast:
+    enable_ai_analysis: false
+    enable_static_analysis: true
+    enable_deep_analysis: false
+    enable_tip_check: false
+
+  # 标准模式：AI + 静态分析
+  standard:
+    enable_ai_analysis: true
+    enable_static_analysis: true
+    enable_deep_analysis: false
+    enable_tip_check: false
+
+  # 深度模式：全面分析（不含沙箱）
+  deep:
+    enable_ai_analysis: true
+    enable_static_analysis: true
+    enable_deep_analysis: true
+    enable_tip_check: true
+
+  # 专家模式：所有分析（含沙箱）
+  expert:
+    enable_ai_analysis: true
+    enable_static_analysis: true
+    enable_deep_analysis: true
+    enable_tip_check: true
+
+# ========== 输出配置 ==========
+output:
+  # 输出格式: json, yaml, markdown
+  format: json
+
+  # 详细输出
+  verbose: true
+
+  # 保存证据到文件
+  save_evidence: true
+
+  # 是否生成 HTML 报告
+  generate_html: false
+
+  # 报告文件命名模板
+  # 支持变量: {skill_name}, {timestamp}, {risk_level}
+  report_filename: "audit-{skill_name}-{timestamp}.json"
+
+# ========== 日志配置 ==========
+logging:
+  # 日志级别: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: INFO
+
+  # 日志格式
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+  # 是否输出到文件
+  log_to_file: true
+
+# ========== 性能优化 ==========
+performance:
+  # 并发数（用于批量扫描）
+  max_workers: 4
+
+  # 单个 skill 审计超时（秒）
+  audit_timeout: 300
+
+  # 缓存 LLM 响应（避免重复分析）
+  cache_llm_responses: true
+
+  # 缓存有效期（秒）
+  cache_ttl: 86400  # 24 小时
+
+# ========== 安全配置 ==========
+security:
+  # 最大文件大小（字节）
+  max_file_size: 10485760  # 10 MB
+
+  # 最大代码行数
+  max_code_lines: 10000
+
+  # 允许的文件扩展名
+  allowed_extensions:
+    - .py
+    - .js
+    - .ts
+    - .md
+    - .yml
+    - .yaml
+    - .json
+    - .toml
+
+# ========== Claude Code Skill 特定配置 ==========
+claude_code:
+  # 是否在 Claude Code 环境中运行
+  enabled: true
+
+  # 自动检测 skill 路径
+  auto_detect_path: true
+
+  # 报告输出位置：skill_dir（skill目录下）, cwd（当前工作目录）, temp（临时目录）, custom（自定义目录）
+  report_location: custom
+  custom_report_dir: ~/.claude/audit-reports
+
+# ========== 通知配置 ==========
+notifications:
+  # 是否启用 Webhook 通知（默认关闭，适合个人开发环境）
+  # 生产服务器建议设置为 true
+  enabled: false
+
+  # Lark Webhook URL
+  lark_webhook_url: "{{LARK_WEBHOOK_URL}}"
+
+  # 通知条件：always | on_risk | high_and_above | critical_only
+  notify_on: always
+
+  # 请求超时（秒）
+  timeout: 10
+
+  # 主机识别信息配置（用于区分不同部署环境）
+  host_info:
+    # 是否包含主机名
+    include_hostname: true
+
+    # 是否包含IP地址
+    include_ip: true
+
+    # 环境标识（留空则自动使用主机名）
+    environment_label: ""
