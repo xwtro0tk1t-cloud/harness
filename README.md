@@ -21,6 +21,75 @@ AI Agents write code fast, but "fast" brings four core problems:
 
 **Harness's solution**: Establish four layers of guardrails with a single command at project initialization, automatically effective in every subsequent development session.
 
+But it's not just these 4 — we've identified **24 pain points** across 7 categories. Here's how Harness addresses each one ↓
+
+---
+
+## Roadmap: AI Development Pain Points & Harness Solutions
+
+24 common pain points in AI-assisted development, organized by category. Each lists Harness's current solution, strength rating, and planned future enhancements. **[Detailed version with full problem descriptions and solution architecture →](references/roadmap.md)**
+
+### Thinking & Planning
+
+| # | Pain Point | Current Solution | Strength | Future Enhancement |
+|---|-----------|-----------------|----------|-------------------|
+| 1 | **AI codes before thinking** — jumps to implementation without understanding requirements | superpowers brainstorming HARD-GATE: no code until design approved | ★★★★★ | — |
+| 2 | **Plans collapse mid-task** — AI forgets the plan halfway through | planning-with-files 4 Hooks: re-read task_plan.md before every tool call | ★★★★☆ | Auto-detect plan drift (compare actions vs plan) |
+| 3 | **One-shot answers** — AI gives a single solution without exploring alternatives | superpowers brainstorming forces 2+ approaches with trade-offs | ★★★★☆ | — |
+| 4 | **No adversarial review** — nobody challenges the AI's design | Challenger (C) agent role: CLAIM/CHALLENGE/VERIFICATION/VERDICT | ★★★☆☆ | Auto-invoke Challenger after Architect produces a plan |
+
+### Memory & Context
+
+| # | Pain Point | Current Solution | Strength | Future Enhancement |
+|---|-----------|-----------------|----------|-------------------|
+| 5 | **Context loss after /compact** — AI forgets decisions and progress | Compact checkpoint rule: must update progress.md + task_plan.md before compact | ★★★★☆ | Auto-checkpoint hook before compact |
+| 6 | **New session cold start** — AI doesn't know the project | CLAUDE.md (≤150 lines) auto-loaded + docs/ B-tree index for on-demand deep reading | ★★★★★ | — |
+| 7 | **Repeated mistakes across sessions** — same pitfall hit multiple times | claudeception extracts pitfalls into reusable Skills; docs/pitfalls/ records | ★★★★☆ | Auto-match pitfall Skills before coding starts |
+| 8 | **Context window quality degradation** — output quality drops as context grows | Context Recovery 4-step protocol + Token Budget rules (offset+limit, structured output) | ★★★☆☆ | Token pressure monitoring + auto-compact suggestion |
+
+### Quality Control
+
+| # | Pain Point | Current Solution | Strength | Future Enhancement |
+|---|-----------|-----------------|----------|-------------------|
+| 9 | **"Done" without verification** — AI claims completion without evidence | superpowers verification Iron Law + Stop hook checks Phase completion | ★★★★★ | — |
+| 10 | **No tests** — code ships without test coverage | superpowers TDD Iron Law: "NO CODE WITHOUT FAILING TEST FIRST" | ★★★★★ | — |
+| 11 | **Skips code review** — AI produces code nobody reviews | superpowers code-review dispatches reviewer subagent | ★★★★☆ | Auto-trigger review on PR creation |
+| 12 | **Security vulnerabilities introduced** — AI writes insecure code | 3-layer security: CWE defense in CLAUDE.md + secure-coding.md + security-review Skills | ★★★★☆ | Auto-security-scan on every commit (Enterprise hook) |
+
+### Code Hygiene & Documentation
+
+| # | Pain Point | Current Solution | Strength | Future Enhancement |
+|---|-----------|-----------------|----------|-------------------|
+| 13 | **Dead code accumulation** — commented-out code, unused imports pile up | CLAUDE.md 5 MUST NOT hygiene rules + quality gate Check #5 | ★★★★☆ | Lint integration in quality gate |
+| 14 | **Documentation goes stale** — docs don't match code after changes | Three-tier doc sync: Lite (self-check) → Standard (dynamic grep) → Full (quality gate) | ★★★★☆ | PostToolUse hook for real-time doc sync reminder |
+| 15 | **Root directory pollution** — test scripts, debug files accumulate | CLAUDE.md rule: temp files go in tests/, harness-audit checks root cleanliness | ★★★☆☆ | Auto-move detected temp files |
+| 16 | **FIXME/HACK debt** — temporary fixes become permanent | CLAUDE.md rule: resolve within 1 week; harness-audit flags stale FIXMEs | ★★★☆☆ | Track FIXME age in quality gate |
+
+### Hallucination & Reliability
+
+| # | Pain Point | Current Solution | Strength | Future Enhancement |
+|---|-----------|-----------------|----------|-------------------|
+| 17 | **API hallucination** — AI invents non-existent APIs or library functions | Challenger role verifies claims against source/docs; superpowers Red Flags table | ★★★☆☆ | Auto-verify imports against installed packages |
+| 18 | **Confident but wrong** — AI states incorrect facts with high confidence | Challenger VERDICT system (CONFIRMED/REFUTED/UNVERIFIED) + evidence requirement | ★★★☆☆ | Mandatory citation for architectural claims |
+| 19 | **Blind copy-paste** — AI copies existing bad patterns in the codebase | CLAUDE.md MUST NOT rules + security standards block known bad patterns | ★★★☆☆ | Anti-pattern database from pitfall records |
+
+### Collaboration & Workflow
+
+| # | Pain Point | Current Solution | Strength | Future Enhancement |
+|---|-----------|-----------------|----------|-------------------|
+| 20 | **No role separation** — same AI does design, coding, testing, review | Agent Team: Architect / Challenger / Engineer / Tester with strict constraints | ★★★★☆ | Workflow orchestration (auto role transitions) |
+| 21 | **Experience not captured** — hard-won knowledge lost after session ends | claudeception continuous learning + UserPromptSubmit hook evaluation | ★★★★☆ | Auto-extract on session end (not just /claudeception) |
+| 22 | **No project health visibility** — don't know if guardrails are working | harness-audit: scan completeness of CLAUDE.md/docs/hooks/skills, output score | ★★★☆☆ | Trend tracking across audits |
+
+### Security & Compliance
+
+| # | Pain Point | Current Solution | Strength | Future Enhancement |
+|---|-----------|-----------------|----------|-------------------|
+| 23 | **Secret leaks in commits** — API keys, credentials committed to git | Enterprise Hook: pre-commit secret scan + CLAUDE.md MUST NOT .env/*.key/*.pem | ★★★★☆ | Default-on secret scanning (not Enterprise-only) |
+| 24 | **Supply chain attacks** — malicious dependencies slip in | supply-chain-audit Skill (8 languages) + sca-ai-denoise for vulnerability triage | ★★★★☆ | Auto-audit on dependency changes |
+
+**Overall**: 4 fully solved (★★★★★), 12 strong (★★★★☆), 8 partial (★★★☆☆), 0 unsolved. ★★★★★ = system-level enforcement, ★★★★☆ = strong with minor gaps, ★★★☆☆ = partial, enhancement planned.
+
 ---
 
 ## Four-Layer Guardrail Architecture
@@ -51,7 +120,7 @@ AI Agents write code fast, but "fast" brings four core problems:
 
 **1. CLAUDE.md — The AI's Onboarding Manual**
 
-After automatically analyzing the project, Harness generates a lean CLAUDE.md (≤100 lines) that serves as the AI's first reading material at the start of every session:
+After automatically analyzing the project, Harness generates a lean CLAUDE.md (≤150 lines) that serves as the AI's first reading material at the start of every session:
 
 ```markdown
 # MyProject
@@ -78,7 +147,7 @@ Why "slim down"? Because CLAUDE.md is read in full at every session. Stuffing 50
 AI's memory isn't a pile of documents — it's an index tree. Each level stores only pointers; only leaf nodes store content:
 
 ```
-L0: CLAUDE.md (≤100 lines)
+L0: CLAUDE.md (≤150 lines)
      → 5 category pointers, zero actual content
      │
 L1: docs/xxx/INDEX.md (≤50 lines)
@@ -112,8 +181,9 @@ Different roles read different docs and follow different constraints:
 | Role | Responsibilities | Constraints |
 |------|-----------------|-------------|
 | **Architect (A)** | Planning, design, interaction, commits, docs | Must brainstorm → user approval → write design doc |
-| **Engineer (B)** | Coding, fixes, refactoring | Must TDD, must not touch architecture-level config |
-| **Tester (C)** | Write tests, verify | **Must not modify business code**, only report bugs |
+| **Challenger (C)** | Adversarial review of plans, designs, and claims | Never accept claims without evidence; verify API usage, thread safety, edge cases |
+| **Engineer (E)** | Coding, fixes, refactoring | Must TDD, must not touch architecture-level config |
+| **Tester (T)** | Write tests, verify | **Must not modify business code**, only report bugs |
 
 Trigger methods:
 - Natural language: `"Have Agent B implement this feature"` / `"Have Agent C run tests to verify"`
@@ -302,16 +372,17 @@ MUST NOT:
   ❌ Don't leave FIXME/HACK unresolved for more than 1 week
 ```
 
-**2. Documentation Sync (auto-triggered on code changes)**
+**2. Documentation Sync (three-tier quality gate)**
 
-The PostToolUse hook reminds you to update docs after every code write:
+Documentation sync is enforced at three levels to balance thoroughness with speed:
 
-| Code Change | MUST Update |
-|-------------|-------------|
-| Add/remove API | docs/architecture/api-reference.md |
-| Modify DB Schema | docs/architecture/db-schema.md |
-| Add/modify module | docs/implementation/<module>.md |
-| Modify build commands | CLAUDE.md command quick reference |
+| Level | Trigger | What Happens |
+|-------|---------|-------------|
+| **Lite** | After editing source code (CLAUDE.md behavior rule) | Self-check: does a matching doc in docs/ exist? If yes and content affected → update now |
+| **Standard** | Claiming "done" or "complete" | Auto quality gate: dynamic scan of git diff + grep docs/ for references to changed modules |
+| **Full** | "quality gate" or "ready to commit" | All 7 checks including tests, lint, security, doc sync, hygiene, progress, commit format |
+
+The quality gate dynamically detects which docs need updating (no hardcoded file mappings) — it scans docs/ structure and greps for references to changed files.
 
 **3. Pitfall Records (auto-triggered after debugging for >10 minutes)**
 
@@ -656,7 +727,7 @@ Harness provides 4 post-initialization commands, installed as independent Skills
 |---------|--------------|-------------|
 | `harness help` | "harness help", "harness commands", "what commands" | Command index + installed Skill inventory + scenario quick entries |
 | `harness audit` | "harness audit", "project health check", "harness status" | Scan CLAUDE.md/docs/hooks/skill completeness, output score + remediation |
-| `harness quality gate` | "quality gate", "pre-commit check", "ready to commit" | Tests + lint + security review + doc sync + code hygiene + progress update |
+| `harness quality gate` | "quality gate", "ready to commit", or auto on "done" | 3 levels: Lite (doc sync), Standard (hygiene+docs+progress), Full (all 7 checks) |
 | `harness guide` | "recommend skill", "which skill", "skill recommendation" | Read scenario→Skill recommendation matrix, match the best Skill |
 
 ---
@@ -721,7 +792,8 @@ Skills requiring configuration are interactively guided during Harness initializ
 │   ├── secure-coding.md                  Security standards (CWE + OWASP + Agent red lines)
 │   ├── conventions.md                    Dev conventions + Agent behavior rules (9 MUST rules) + Token optimization
 │   ├── lang-patterns.md                  Tech stack coding patterns (6 languages/frameworks)
-│   └── hook-scripts.md                   Enterprise Hook gate scripts (4 scripts + activation guide)
+│   ├── hook-scripts.md                   Enterprise Hook gate scripts (4 scripts + activation guide)
+│   └── roadmap.md                        AI development pain points & solutions (24 items, detailed)
 └── templates/
     ├── claude-md-index.md                CLAUDE.md slim template (L0 index)
     ├── sub-index.md                      L1 category index + L2 module index templates

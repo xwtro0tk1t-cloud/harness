@@ -1,12 +1,19 @@
 # Harness Quality Gate — Pre-Commit Quality Check
 
 ---
-description: Triggered when the user says "quality gate", "pre-commit check", "ready to commit", "check before commit", or "run quality checks". Executes comprehensive quality checks before code commits.
+description: Triggered when the user says "quality gate", "pre-commit check", "ready to commit", "check before commit", "run quality checks", or "done"/"complete" (Standard level auto-trigger). Executes quality checks before code commits at three levels — Lite (doc sync reminder), Standard (hygiene + docs + progress), Full (all 7 checks).
 ---
 
-## Behavior
+## Check Levels
 
-Execute the following checks in order before code commit. All must pass before recommending commit.
+| Level | Trigger | Checks |
+|-------|---------|--------|
+| **Lite** | After editing source code (CLAUDE.md behavior rule) | Doc sync self-check only (zero cost) |
+| **Standard** | Claiming "done" / "complete" | #4 Documentation Sync + #5 Code Hygiene + #6 Progress Update |
+| **Full** | "quality gate" / "ready to commit" / "pre-commit check" | All 7 checks below |
+
+When triggered at Standard level, run only checks #4, #5, #6 and output the report.
+When triggered at Full level, run all checks in order. All must pass before recommending commit.
 
 ---
 
@@ -63,15 +70,25 @@ Verdict:
 ### 4. Documentation Sync
 
 ```
-Check if code changes require documentation updates:
-  - New/removed API endpoints → docs/architecture/api-reference.md
-  - Modified DB schema → docs/architecture/db-schema.md
-  - New/modified modules → docs/implementation/<module>.md
-  - Modified build commands → CLAUDE.md command quick reference
+Dynamically detect which docs need updating (do NOT hardcode file mappings):
+
+  1. Run: git diff --name-only HEAD → list changed source files
+  2. Scan docs/ directory structure to understand existing doc organization
+  3. For each changed source file:
+     - Search docs/ for references to the changed module/file name
+       (grep the filename, class names, or function names in docs/)
+     - If a matching doc exists AND was NOT also modified → flag ⚠️
+  4. Special case detection (infer from project, not hardcode):
+     - Changed files contain DB migration/schema patterns
+       AND a db-schema doc exists → check if updated
+     - Changed files contain API route/endpoint definitions
+       AND an api-reference doc exists → check if updated
+     - Changed files are build config (pyproject.toml/package.json/Cargo.toml/go.mod/Makefile)
+       AND CLAUDE.md has a command section → check if commands changed
 
 Verdict:
-  ✅ Docs in sync, or no updates needed
-  ⚠️ May need updates → list suggested docs to update
+  ✅ Docs in sync, or no matching docs found
+  ⚠️ May need updates → list the doc file + the source change that triggered it
 ```
 
 ### 5. Code Hygiene
