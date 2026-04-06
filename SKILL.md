@@ -348,8 +348,16 @@ Extract from `references/conventions.md` Part B and write into the "Behavior Rul
 
 ### Documentation & Knowledge Capture
 - When changing code, MUST synchronize updates to corresponding documentation (API → api-reference.md, Schema → db-schema.md...)
+- **Documentation Sync self-check** (after editing source code):
+  - Check: does a corresponding doc in docs/ exist for this module?
+  - If yes and the change affects its content (API, schema, config) → update it NOW
+  - If unsure → note in progress.md for quality gate to verify later
 - For issues that took over 10 minutes to debug, MUST record to docs/pitfalls/ or generate a Skill via /claudeception
 - After completing a task, MUST evaluate whether there is extractable knowledge (/claudeception)
+
+### Quality Gate
+- Before YOU (the AI) claim "done" / "complete" to the user → run Standard quality gate (doc sync + code hygiene + progress)
+- When user explicitly requests "quality gate" / "ready to commit" / "pre-commit check" → run Full quality gate
 
 ### Code Hygiene
 - MUST NOT leave commented-out code blocks (delete them — git has the history)
@@ -357,8 +365,19 @@ Extract from `references/conventions.md` Part B and write into the "Behavior Rul
 - MUST NOT leave unused imports / variables / functions / dependencies
 - MUST clean up junk files in the root directory (test scripts go in tests/, docs go in docs/)
 
+### Context Recovery (after /compact or new session)
+Re-read in this order — do NOT re-read everything, read indexes then on-demand:
+1. This file (CLAUDE.md) — already auto-loaded
+2. task_plan.md lines 1-30 — current Phase + progress
+3. docs/architecture/INDEX.md — only if task touches architecture
+4. The specific docs/ file for the module you are working on
+
 ### Token Efficiency
 - /compact at Phase completion boundaries, not mid-task
+- **Before /compact** (mandatory checkpoint):
+  - Update progress.md with current status and any uncommitted decisions
+  - Update task_plan.md Phase checkboxes to reflect actual progress
+  - Note any in-progress work that needs to be resumed after compact
 - After compact, MUST re-read task_plan.md
 - Large files (>300 lines): use offset+limit for segmented reading
 - Structured output (JSON/tables) preferred over long-form prose
