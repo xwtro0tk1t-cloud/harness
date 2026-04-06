@@ -22,15 +22,23 @@ When triggered at Full level, run all checks in order. All must pass before reco
 ### 1. Tests Pass
 
 ```
-Detect project test framework and run tests:
-  Python  → pytest -v (or project-configured test command)
-  Node.js → npm test / yarn test
-  Go      → go test ./...
-  Rust    → cargo test
-  Java    → mvn test / gradle test
+Evidence-first check — avoid re-running if recently verified:
+
+  1. Check progress.md for "tests passed" / "all tests pass" within current task
+  2. Check git log --oneline -5 for test-related commits by Tester agent
+  3. If evidence found AND no source code changed since then:
+     → ✅ Tests passed (verified by Tester agent, no code changes since)
+     → Skip re-run
+  4. If no evidence or code changed since last test:
+     → Detect project test framework and run tests:
+       Python  → pytest -v (or project-configured test command)
+       Node.js → npm test / yarn test
+       Go      → go test ./...
+       Rust    → cargo test
+       Java    → mvn test / gradle test
 
 Verdict:
-  ✅ All passed
+  ✅ All passed (or recently verified — skip re-run)
   ❌ Failing tests → list failed cases, BLOCK commit
   ⚠️ No tests → remind "consider writing tests first"
 ```
@@ -38,15 +46,19 @@ Verdict:
 ### 2. Lint Passes
 
 ```
-Detect project linter config and run lint:
-  Python  → flake8 / ruff / pylint (per project config)
-  Node.js → eslint / prettier
-  Go      → golangci-lint run
-  Rust    → cargo clippy
-  Java    → checkstyle / spotbugs
+Evidence-first check — same as Tests:
+
+  1. Check progress.md / recent output for "lint passed" / "no lint errors"
+  2. If verified recently AND no code changed since → skip re-run
+  3. Otherwise detect project linter config and run lint:
+     Python  → flake8 / ruff / pylint (per project config)
+     Node.js → eslint / prettier
+     Go      → golangci-lint run
+     Rust    → cargo clippy
+     Java    → checkstyle / spotbugs
 
 Verdict:
-  ✅ No errors
+  ✅ No errors (or recently verified — skip re-run)
   ⚠️ Warnings only → list but don't block
   ❌ Errors found → BLOCK commit
 ```

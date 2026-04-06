@@ -427,6 +427,21 @@ docs/
 
 Refer to `references/agent-teams.md`.
 
+**4.0 Detect Existing Agent Teams (CRITICAL)**
+
+Before designing or reconfiguring the Agent Team:
+```
+1. Check if .harness/agents/ already has role definitions
+2. Check if Agent Teams mode is currently active (tmux panes / running teammates)
+3. If BOTH exist:
+   → Display current team: "Agent Team already configured: A(Architect), B(Engineer), C(Tester)..."
+   → Ask: "Keep current team? [Y] Keep / [N] Reconfigure"
+   → Default: KEEP — do NOT destroy running teammates
+4. If only .harness/agents/ exists (no running teammates):
+   → Ask: "Found existing role definitions. Update or keep? [K] Keep / [U] Update"
+5. Only proceed to 4.1 if user explicitly chooses to reconfigure
+```
+
 **4.1 Confirm Role Assignments with the User**
 
 Do not use default templates — **you must ask the user** for their desired role assignments:
