@@ -22,6 +22,9 @@ Harness Command System:
   harness audit        — Project health check (verify CLAUDE.md/docs/hooks/skill completeness)
   harness quality gate — Pre-commit quality gate (tests + lint + security review + doc sync)
   harness guide        — Skill recommendation (match the best Skill for your scenario)
+  harness cleanup      — Interactive temp file archive (scan → confirm → move to archive/, never deletes)
+  harness resume       — Lightweight context recovery (same session after /compact, ~3k tokens)
+  harness handoff      — Deep context handoff (new agent / crash recovery, ~8k tokens)
 ```
 
 ## Installed Skills Inventory
@@ -71,6 +74,9 @@ Status labels: ✅ Installed | ❌ Not installed | ⚠️ Needs configuration
 | Docker security review | "Review Docker configuration" → security-review-skill-for-docker |
 | Pre-commit check | Say "quality gate" → harness-quality-gate |
 | Check project health | Say "harness audit" |
+| Clean up temp files | Say "harness cleanup" → interactive archive to archive/ |
+| Resume after /compact | Say "harness resume" → lightweight recovery (~3k tokens) |
+| Hand off to new agent | Say "harness handoff" → deep handoff (~8k tokens) |
 | Recommend a Skill | Say "harness guide" or "which skill should I use" |
 | Capture experience | Say "/claudeception" |
 | Create a new Skill | "Help me create a skill for XX" → skill-creator |

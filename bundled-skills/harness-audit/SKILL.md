@@ -12,7 +12,7 @@ Perform a comprehensive health check on the current project, outputting a checkl
 
 ## Checklist
 
-### A. Infrastructure (max 30 points)
+### A. Infrastructure (max 25 points)
 
 | # | Check Item | Points | Method |
 |---|-----------|--------|--------|
@@ -34,10 +34,11 @@ Perform a comprehensive health check on the current project, outputting a checkl
 | # | Check Item | Points | Method |
 |---|-----------|--------|--------|
 | C1 | Skill factories installed (skill-creator + security-review-skill-creator) | 5 | Scan ~/.claude/skills/ |
-| C2 | Security Skills installed (sca-ai-denoise + supply-chain-audit + skills-audit) | 10 | Scan ~/.claude/skills/ |
+| C2 | Security Skills installed (sca-ai-denoise + supply-chain-audit + skills-audit) | 5 | Scan ~/.claude/skills/ |
 | C3 | Configurable Skill status (web-vuln-analyzer / android-vuln-analyzer) | 5 | Check installation + config files |
+| C4 | Command Skills installed (harness-help + harness-audit + harness-quality-gate + harness-guide + harness-cleanup + harness-resume + harness-handoff) | 5 | Scan ~/.claude/skills/harness-* |
 
-### D. Code Hygiene (max 20 points)
+### D. Code Hygiene (max 25 points)
 
 | # | Check Item | Points | Method |
 |---|-----------|--------|--------|
@@ -45,6 +46,9 @@ Perform a comprehensive health check on the current project, outputting a checkl
 | D2 | .env file not tracked by git | 5 | git ls-files --error-unmatch .env |
 | D3 | No hardcoded secrets/tokens in tracked files | 5 | Grep common key patterns |
 | D4 | docs/ has recent updates (within 30 days) | 5 | git log check |
+| D5 | docs/ INDEX.md two-level structure complete (file-level + section-level ↳ prefix) | 5 | Read INDEX.md and check format |
+
+> **Remediation**: For temp files found in D1, suggest user runs **harness cleanup** for interactive archiving (never deletes, only moves to archive/).
 
 ---
 
@@ -57,7 +61,7 @@ Perform a comprehensive health check on the current project, outputting a checkl
 
 📊 Total Score: XX / 100
 
-A. Infrastructure [XX/30]
+A. Infrastructure [XX/25]
   ✅ A1: CLAUDE.md exists (XX lines)
   ❌ A2: docs/ missing pitfalls/ directory
   ✅ A3: .harness/ complete
@@ -72,8 +76,9 @@ C. Bundled Skills [XX/20]
   ✅ C1: 2/2 Skill factories installed
   ✅ C2: 3/3 security Skills installed
   ⚠️ C3: web-vuln-analyzer installed but not configured
+  ✅ C4: 7/7 command Skills installed
 
-D. Code Hygiene [XX/20]
+D. Code Hygiene [XX/25]
   ❌ D1: Found 3 temp scripts in root directory
   ✅ D2: .env not tracked
   ✅ D3: No hardcoded secrets found

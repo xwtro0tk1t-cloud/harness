@@ -1,10 +1,10 @@
-# Harness — AI Agent Development Guardrail System
+# Harness — AI Agent Development Scaffold & Security Enhancement
 
-> **Harness** is an AI Agent development guardrail Meta-Skill that establishes four layers of defense for any project in one command: knowledge management, architecture constraints, feedback loops, and entropy management.
+> **Harness** is an AI Agent development scaffold Meta-Skill that establishes four layers of enhancement for any project in one command: knowledge management, architecture constraints, feedback loops, and entropy management.
 >
-> **Optimized for Claude Code**: Harness leverages Claude Code's unique Hook system (SessionStart / PreToolUse / PostToolUse / Stop) for system-level behavior enforcement — access controls the AI cannot bypass, not just "please follow the rules." Combined with the experimental Agent Teams feature, you can spin up multi-role collaboration (Architect / Engineer / Tester) in one prompt. All three enforcement layers (Hooks + instruction file + Skill psychological defense) are fully active on Claude Code, delivering the most complete guardrail experience.
+> **Optimized for Claude Code**: Harness leverages Claude Code's unique Hook system (SessionStart / PreToolUse / PostToolUse / Stop) for system-level behavior enhancement. Combined with the experimental Agent Teams feature, you can spin up multi-role collaboration (Architect / Engineer / Tester) in one prompt. Dual-layer enhancement (Hook system-level + instruction file rule-level) + Skill auto-matching are fully active on Claude Code, delivering the most complete enhancement experience.
 >
-> **Compatible with 9 AI coding tools**: Cursor, Windsurf, Cline, GitHub Copilot, Aider, Continue, Devin, and any tool supporting project-level instruction files (via `AGENT.md` as generic fallback). Layer 2 (instruction file rules) and Layer 3 (docs/ documentation) work universally across all tools, ensuring core guardrails remain effective regardless of your IDE.
+> **Compatible with 9 AI coding tools**: Cursor, Windsurf, Cline, GitHub Copilot, Aider, Continue, Devin, and any tool supporting project-level instruction files (via `AGENT.md` as generic fallback). Instruction file rules and docs/ documentation work universally across all tools, ensuring core enhancements remain effective regardless of your IDE.
 
 ---
 
@@ -19,7 +19,7 @@ AI Agents write code fast, but "fast" brings four core problems:
 | **No feedback** | "Confidently declares mission accomplished" when it's actually a mess | Production incidents, rework |
 | **Entropy increase** | Writing fast = garbage piles up fast | Technical debt explosion, outdated documentation |
 
-**Harness's solution**: Establish four layers of guardrails with a single command at project initialization, automatically effective in every subsequent development session.
+**Harness's solution**: Establish four layers of enhancement with a single command at project initialization, automatically effective in every subsequent development session.
 
 But it's not just these 4 — we've identified **24 pain points** across 7 categories. Here's how Harness addresses each one ↓
 
@@ -62,7 +62,7 @@ But it's not just these 4 — we've identified **24 pain points** across 7 categ
 |---|-----------|-----------------|----------|-------------------|
 | 13 | **Dead code accumulation** — commented-out code, unused imports pile up | CLAUDE.md 5 MUST NOT hygiene rules + quality gate Check #5 | ★★★★☆ | Lint integration in quality gate |
 | 14 | **Documentation goes stale** — docs don't match code after changes | Three-tier doc sync: Lite (self-check) → Standard (dynamic grep) → Full (quality gate) | ★★★★☆ | PostToolUse hook for real-time doc sync reminder |
-| 15 | **Root directory pollution** — test scripts, debug files accumulate | CLAUDE.md rule: temp files go in tests/, harness-audit checks root cleanliness | ★★★☆☆ | Auto-move detected temp files |
+| 15 | **Root directory pollution** — test scripts, debug files accumulate | harness-cleanup interactive archive + harness-audit checks root cleanliness | ★★★★☆ | — |
 | 16 | **FIXME/HACK debt** — temporary fixes become permanent | CLAUDE.md rule: resolve within 1 week; harness-audit flags stale FIXMEs | ★★★☆☆ | Track FIXME age in quality gate |
 
 ### Hallucination & Reliability
@@ -79,7 +79,7 @@ But it's not just these 4 — we've identified **24 pain points** across 7 categ
 |---|-----------|-----------------|----------|-------------------|
 | 20 | **No role separation** — same AI does design, coding, testing, review | Agent Team: Architect / Challenger / Engineer / Tester with strict constraints | ★★★★☆ | Workflow orchestration (auto role transitions) |
 | 21 | **Experience not captured** — hard-won knowledge lost after session ends | claudeception continuous learning + UserPromptSubmit hook evaluation | ★★★★☆ | Auto-extract on session end (not just /claudeception) |
-| 22 | **No project health visibility** — don't know if guardrails are working | harness-audit: scan completeness of CLAUDE.md/docs/hooks/skills, output score | ★★★☆☆ | Trend tracking across audits |
+| 22 | **No project health visibility** — don't know if enhancements are working | harness-audit: scan completeness of CLAUDE.md/docs/hooks/skills, output score | ★★★☆☆ | Trend tracking across audits |
 
 ### Security & Compliance
 
@@ -88,22 +88,22 @@ But it's not just these 4 — we've identified **24 pain points** across 7 categ
 | 23 | **Secret leaks in commits** — API keys, credentials committed to git | Enterprise Hook: pre-commit secret scan + CLAUDE.md MUST NOT .env/*.key/*.pem | ★★★★☆ | Default-on secret scanning (not Enterprise-only) |
 | 24 | **Supply chain attacks** — malicious dependencies slip in | supply-chain-audit Skill (8 languages) + sca-ai-denoise for vulnerability triage | ★★★★☆ | Auto-audit on dependency changes |
 
-**Overall**: 4 fully solved (★★★★★), 12 strong (★★★★☆), 8 partial (★★★☆☆), 0 unsolved. ★★★★★ = system-level enforcement, ★★★★☆ = strong with minor gaps, ★★★☆☆ = partial, enhancement planned.
+**Overall**: 4 fully solved (★★★★★), 13 strong (★★★★☆), 7 partial (★★★☆☆), 0 unsolved. ★★★★★ = system-level enforcement, ★★★★☆ = strong with minor gaps, ★★★☆☆ = partial, enhancement planned.
 
 ---
 
-## Four-Layer Guardrail Architecture
+## Four-Layer Enhancement System
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                  Harness Guardrail System                │
+│                Harness Enhancement System                │
 ├──────────────┬──────────────┬──────────────┬────────────┤
-│  Guardrail 1 │  Guardrail 2 │  Guardrail 3 │ Guardrail 4│
+│  Layer One   │  Layer Two   │  Layer Three │ Layer Four │
 │  Knowledge   │  Architecture│  Feedback    │  Entropy   │
 │  Mgmt 📋    │  Constraints 🚧│  Loops 🔄  │  Mgmt 🧹  │
 │              │              │              │            │
 │  CLAUDE.md   │  Hook-based  │  TDD         │  Code      │
-│  docs/ tree  │  enforcement │  Code Review │  hygiene   │
+│  docs/ tree  │  enhancement │  Code Review │  hygiene   │
 │  Agent Team  │  Security    │  Verification│  Doc sync  │
 │  Skill       │  standards   │  gates       │  Pitfall   │
 │  ecosystem   │  CWE defense │  Security    │  records   │
@@ -112,7 +112,7 @@ But it's not just these 4 — we've identified **24 pain points** across 7 categ
 └──────────────┴──────────────┴──────────────┴────────────┘
 ```
 
-### Guardrail 1: Knowledge Management 📋
+### Layer One: Knowledge Management 📋
 
 **Problem**: The AI Agent doesn't know your project's background, conventions, or habits.
 
@@ -212,11 +212,11 @@ Harness doesn't reinvent the wheel — it references and orchestrates existing o
 
 ---
 
-### Guardrail 2: Architecture Constraints 🚧
+### Layer Two: Architecture Constraints 🚧
 
 **Problem**: Written rules alone aren't enough — AI will rationalize skipping them. You need an "access control system."
 
-**Harness's solution: Three-layer enforcement mechanism (Open-Source vs Enterprise Mode)**
+**Harness's solution: Dual-layer enhancement + Skill auto-matching (Open-Source vs Enterprise Mode)**
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -251,8 +251,8 @@ Harness doesn't reinvent the wheel — it references and orchestrates existing o
 │  MUST NOT shell=True with user args — CWE-78        │
 │  MUST NOT f-string SQL concatenation — CWE-89       │
 ├──────────────────────────────────────────────────────┤
-│  Layer 3: Skills — Psychological Constraints         │
-│           (semantic-level, internalized behavior)     │
+│  Skill Auto-matching — Semantic Trigger               │
+│  (skill description matched to current task)          │
 │                                                      │
 │  Iron Laws: "NO CODE WITHOUT FAILING TEST FIRST"     │
 │  Red Flags: 13 common "rationalized skip" excuses    │
@@ -263,20 +263,20 @@ Harness doesn't reinvent the wheel — it references and orchestrates existing o
 
 **Open-Source Mode vs Enterprise Mode**:
 
-| Mode | Layer 1 | Layer 2 | Layer 3 | Security Assurance |
-|------|---------|---------|---------|-------------------|
-| **Open-Source (default)** | Core Hooks (3 Skills) | MUST/MUST NOT text rules | Skill psychological defense | AI self-discipline + text rules |
+| Mode | Layer 1 | Layer 2 | Skill Auto-matching | Security Assurance |
+|------|---------|---------|---------------------|-------------------|
+| **Open-Source (default)** | Core Hooks (3 Skills) | MUST/MUST NOT text rules | Skill semantic trigger | AI self-discipline + text rules |
 | **Enterprise (optional)** | Core + 4 security gate Hooks | Same + HOOK enforcement layer | Same | System-level technical gates |
 
 - **Open-Source Mode (default)**: Zero additional blocking — security relies on CLAUDE.md MUST/MUST NOT rules for AI self-discipline. Ideal for individual developers, open-source projects
 - **Enterprise Mode (optional)**: Enables 4 security gate Hook scripts (pre-commit / commit-msg / dangerous-cmd / write-scan) for system-level enforcement. Ideal for enterprise teams, projects with high compliance requirements
 - Enterprise mode Hook scripts are in `references/hook-scripts.md`; users choose whether to enable during Harness initialization Step 2
 
-**Why stack three layers?**
+**Why dual-layer enhancement + Skill auto-matching?**
 
 - Hooks are the strongest safeguard: system-level enforcement, AI cannot skip them (Claude Code only)
 - CLAUDE.md is the fallback: rules remain effective even without Hook configuration (universal across all AI tools)
-- Skills are the psychological defense: superpowers' Iron Laws + Red Flags make the AI "automatically stop when tempted to skip"
+- Skills are the semantic trigger: superpowers' Iron Laws + Red Flags make the AI "automatically stop when tempted to skip"
 
 **Security Standards (hard control, non-negotiable)**:
 
@@ -302,7 +302,7 @@ Security standards are written into CLAUDE.md behavior rules to ensure they take
 
 ---
 
-### Guardrail 3: Feedback Loops 🔄
+### Layer Three: Feedback Loops 🔄
 
 **Problem**: After finishing work, the AI doesn't know if it did well, and it will "confidently declare mission accomplished."
 
@@ -349,7 +349,7 @@ The AI's biggest problem isn't not knowing the rules — it's **being skilled at
 
 ---
 
-### Guardrail 4: Entropy Management 🧹
+### Layer Four: Entropy Management 🧹
 
 **Problem**: AI works fast = technical debt accumulates fast. Docs go stale, dead code piles up, experience isn't captured.
 
@@ -441,7 +441,7 @@ Harness interactively executes 8 steps:
 
 ```
 Step 1: Analyze project (language/framework/structure) → Display project profile → User confirms
-Step 2: Install Skill ecosystem + configure Hooks → Three-layer enforcement ready
+Step 2: Install Skill ecosystem + configure Hooks → Dual-layer enhancement ready
 Step 3: Deep information gathering (3 parallel Agents read code/history/docs) → Generate CLAUDE.md + docs/
 Step 4: Design Agent Team (interactive role selection + trigger methods)
 Step 5: Inject development conventions + security standards
@@ -470,7 +470,7 @@ project/
 
 ### Daily Development (Automatically Effective Every Session)
 
-After initialization, every subsequent development session automatically enters the guardrail system:
+After initialization, every subsequent development session automatically enters the enhancement system:
 
 **Developing a new feature**:
 
@@ -531,7 +531,7 @@ Agent (triggers the generated audit Skill):
 
 ## Skill Dependency Graph
 
-Harness doesn't reinvent the wheel — it orchestrates existing open-source Skills to build the guardrail system:
+Harness doesn't reinvent the wheel — it orchestrates existing open-source Skills to build the enhancement system:
 
 ```
                         ┌─────────────┐
@@ -577,15 +577,15 @@ Harness doesn't reinvent the wheel — it orchestrates existing open-source Skil
 
 ### Core Skills in Detail
 
-| Skill | Source | Hook Mechanism | Guardrail Role |
-|-------|--------|---------------|----------------|
-| **superpowers** | [obra/superpowers](https://github.com/obra/superpowers) | SessionStart injects methodology | Guardrail 2 (constraints) + Guardrail 3 (feedback) |
-| **planning-with-files** | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) | 4 Hooks continuously inject plans | Guardrail 1 (knowledge) + Guardrail 4 (entropy) |
-| **claudeception** | [blader/Claudeception](https://github.com/blader/Claudeception) | UserPromptSubmit reminder | Guardrail 4 (entropy) + Guardrail 1 (knowledge) |
+| Skill | Source | Hook Mechanism | Enhancement Role |
+|-------|--------|---------------|------------------|
+| **superpowers** | [obra/superpowers](https://github.com/obra/superpowers) | SessionStart injects methodology | Layer Two (constraints) + Layer Three (feedback) |
+| **planning-with-files** | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) | 4 Hooks continuously inject plans | Layer One (knowledge) + Layer Four (entropy) |
+| **claudeception** | [blader/Claudeception](https://github.com/blader/Claudeception) | UserPromptSubmit reminder | Layer Four (entropy) + Layer One (knowledge) |
 
 ### Skill Triggering: Automatic vs Manual
 
-A core design goal of Harness is that **you don't need to manually invoke Skills during day-to-day development**. The three-layer mechanism (Hook + CLAUDE.md + Skill description) makes key methodologies take effect automatically in the background.
+A core design goal of Harness is that **you don't need to manually invoke Skills during day-to-day development**. The dual-layer enhancement mechanism (Hook + CLAUDE.md + Skill description) makes key methodologies take effect automatically in the background.
 
 **Automatic Triggering (Hook + CLAUDE.md rules — no manual action needed)**
 
@@ -609,6 +609,9 @@ A core design goal of Harness is that **you don't need to manually invoke Skills
 | skill-creator | "Help me create a skill for XX" | On-demand workflow codification |
 | harness-audit | "harness audit" | On-demand project health check |
 | harness-guide | "harness guide" or "recommend a skill" | On-demand Skill recommendation |
+| harness-cleanup | "harness cleanup" or "clean up temp files" | Interactive archive of temp files to archive/ |
+| harness-resume | "harness resume" | Lightweight context recovery after /compact (~3k tokens) |
+| harness-handoff | "harness handoff" | Deep handoff for new agent takeover (~8k tokens) |
 
 **In short**: Hooks handle the automatic, you handle the decisions. During daily coding, brainstorming/TDD/debugging/planning all work automatically — you only need to speak up when you want a review, want to capture experience, or want to generate a new Skill.
 
@@ -618,7 +621,7 @@ A core design goal of Harness is that **you don't need to manually invoke Skills
 
 After Harness is set up, the following scenarios automatically receive protection:
 
-### Fully Protected Scenarios (Hook + CLAUDE.md + Skill — all three layers)
+### Fully Protected Scenarios (Hook + CLAUDE.md + Skill — all layers)
 
 | # | Scenario | Protection Mechanism |
 |---|----------|---------------------|
@@ -712,16 +715,16 @@ Harness is not limited to Claude Code — it's compatible with all major AI codi
 
 **Same content, adapted format**: All instruction files contain the same project knowledge, behavior rules, and documentation navigation — only the format is adjusted per tool (Markdown tools get tables/links, plain text tools get indentation/lists).
 
-**Three-layer enforcement portability**:
+**Portability of Dual-Layer Enhancement**:
 - **Layer 1 (Hooks)**: Claude Code only — other tools skip this layer
 - **Layer 2 (Instruction file rules)**: Universal across all tools — only the filename differs
-- **Layer 3 (docs/ documentation)**: Fully universal — all AI tools can read Markdown docs
+- **docs/ documentation**: Fully universal — all AI tools can read Markdown docs
 
 ---
 
 ## Command System
 
-Harness provides 4 post-initialization commands, installed as independent Skills in `bundled-skills/`:
+Harness provides 7 post-initialization commands, installed as independent Skills in `bundled-skills/`:
 
 | Command | Trigger Words | Description |
 |---------|--------------|-------------|
@@ -729,12 +732,15 @@ Harness provides 4 post-initialization commands, installed as independent Skills
 | `harness audit` | "harness audit", "project health check", "harness status" | Scan CLAUDE.md/docs/hooks/skill completeness, output score + remediation |
 | `harness quality gate` | "quality gate", "ready to commit", or auto on "done" | 3 levels: Lite (doc sync), Standard (hygiene+docs+progress), Full (all 7 checks) |
 | `harness guide` | "recommend skill", "which skill", "skill recommendation" | Read scenario→Skill recommendation matrix, match the best Skill |
+| `harness cleanup` | "harness cleanup", "clean up temp files", "archive temp files" | Interactive temp file scan, confirm then archive to archive/ (never deletes) |
+| `harness resume` | "harness resume", "resume context after compact" | Lightweight context recovery (same session, ~3k tokens) |
+| `harness handoff` | "harness handoff", "new agent takeover" | Deep context handoff (cross-session/crash recovery, ~8k tokens) |
 
 ---
 
 ## Bundled Skills
 
-Harness packages 9 security/development Skills + 4 command Skills, deployed to `~/.claude/skills/` via symlink during installation:
+Harness packages 9 security/development Skills + 7 command Skills, deployed to `~/.claude/skills/` via symlink during installation:
 
 ```bash
 # Batch install
@@ -759,6 +765,9 @@ done
 | 🛠 Command | harness-audit | Health check | None |
 | 🛠 Command | harness-quality-gate | Quality gate | None |
 | 🛠 Command | harness-guide | Skill recommendation | None |
+| 🧹 Command | harness-cleanup | Interactive temp file archive (never deletes) | None |
+| 🔄 Command | harness-resume | Lightweight context recovery (after /compact) | None |
+| 🔄 Command | harness-handoff | Deep context handoff (new agent takeover) | None |
 
 Skills requiring configuration are interactively guided during Harness initialization Step 2; skipped ones are marked "Not available".
 
@@ -775,6 +784,9 @@ Skills requiring configuration are interactively guided during Harness initializ
 │   ├── harness-audit/SKILL.md            Command: project health check
 │   ├── harness-quality-gate/SKILL.md     Command: pre-commit quality gate
 │   ├── harness-guide/SKILL.md            Command: Skill recommendation guide
+│   ├── harness-cleanup/SKILL.md          Command: interactive temp file archive
+│   ├── harness-resume/SKILL.md           Command: lightweight context recovery
+│   ├── harness-handoff/SKILL.md          Command: deep context handoff
 │   ├── skill-creator/                    General Skill generator
 │   ├── security-review-skill-creator/    Security audit Skill generator
 │   ├── security-review-skill-for-docker/ Docker security audit
@@ -803,15 +815,28 @@ Skills requiring configuration are interactively guided during Harness initializ
 
 ---
 
+## Honesty Statement
+
+Harness's behavior enhancement consists of two layers:
+
+| Layer | Mechanism | Enforcement | Description |
+|-------|-----------|-------------|-------------|
+| Hook scripts | Shell commands, exit 1 blocking | System-level | Pre-commit secret detection, dangerous command interception -- AI cannot bypass |
+| Instruction enhancement | CLAUDE.md + Skill description | Depends on LLM | TDD/Review/documentation sync rules -- AI "should" follow but might not |
+
+Enterprise mode (all 4 Hook scripts enabled) provides stronger security guarantees. Open-source mode (default) relies on the LLM's instruction following capability -- this is prompt engineering, not deterministic access control.
+
+---
+
 ## FAQ
 
 **Q: What's the relationship between Harness and superpowers?**
 A: superpowers is the underlying behavior control framework (14 sub-Skills), while Harness is the higher-level orchestrator — it installs superpowers, configures hooks, generates documentation, and assembles the Agent Team. Analogy: superpowers is the Linux kernel, Harness is the Ubuntu installer.
 
 **Q: Do I need to say "harness" at every session?**
-A: No. Harness only runs once during project initialization. After that, the three layers — Hooks + CLAUDE.md + Skills — take effect automatically at every session.
+A: No. Harness only runs once during project initialization. After that, the dual-layer enhancement — Hooks + CLAUDE.md + Skills — takes effect automatically at every session.
 
-**Q: What if I don't want a particular guardrail?**
+**Q: What if I don't want a particular enhancement?**
 A: Harness is interactive — every step can be skipped. You can also run only specific steps (e.g., generate docs only without setting up an Agent Team).
 
 **Q: Will re-running Harness overwrite my docs?**
